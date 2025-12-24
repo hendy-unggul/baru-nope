@@ -171,35 +171,6 @@
       filter: brightness(0.9);
     }
 
-    /* Jurnal Artefak */
-    .artefak-journal {
-      margin-top: 16px;
-      padding: 12px;
-      background: var(--input-bg);
-      border-radius: var(--radius-10);
-      border-top: 1px solid #222;
-    }
-    .artefak-journal h3 {
-      color: var(--accent);
-      font-size: 1.1rem;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-    .artefak-journal-item {
-      padding: 8px 0;
-      border-bottom: 1px solid #333;
-      font-size: 0.9rem;
-      line-height: 1.4;
-    }
-    .artefak-journal-item:last-child {
-      border-bottom: none;
-    }
-    .artefak-journal-item .note {
-      color: #aaa;
-      font-style: italic;
-      margin-top: 4px;
-    }
-
     .tagline-gen-z {
       color: #aaa;
       font-style: italic;
@@ -438,13 +409,8 @@
     <div class="feed-title">Jejakmu</div>
     <div id="feed-container"></div>
 
+    <!-- INI ADALAH "JURNAL ARTEFAL" YANG DIMAKSUD -->
     <div class="artefak-tray" id="artefak-tray"></div>
-
-    <!-- JURNAL ARTEFAK - DITAMBAHKAN DI SINI, SEBELUM TAGLINE -->
-    <div class="artefak-journal" id="artefak-journal">
-      <h3>📝 Jurnal Artefak</h3>
-      <div id="artefak-journal-list"></div>
-    </div>
 
     <div class="tagline-gen-z">
       Bukan feed. Bukan timeline. Ini jejakmu yang abadi.
@@ -541,7 +507,6 @@
 
       renderFeed();
       renderArtefakTray();
-      renderArtefakJournal(); // Panggil fungsi baru ini
 
       // Rant upload
       document.getElementById('submit-rant').addEventListener('click', () => {
@@ -557,7 +522,7 @@
         };
 
         const rants = JSON.parse(localStorage.getItem('nopeUserRants') || '[]');
-        rants.unshift(newRant); // Tambahkan di awal (paling atas)
+        rants.unshift(newRant);
         localStorage.setItem('nopeUserRants', JSON.stringify(rants));
 
         document.getElementById('rant-input').value = '';
@@ -618,15 +583,16 @@
         };
 
         const artefaks = JSON.parse(localStorage.getItem('nopeArtefaks') || '[]');
-        artefaks.unshift(newArtefak); // PERBAIKAN: Tambahkan di awal (paling atas) - INI YANG DIPERBAIKI!
+        // --- PERBAIKAN UTAMA DI SINI ---
+        // Tambahkan artefak BARU di AWAL array, bukan di akhir.
+        artefaks.unshift(newArtefak);
         localStorage.setItem('nopeArtefaks', JSON.stringify(artefaks));
         localStorage.setItem('nopeLastArtefakTime', now.toString());
 
         document.getElementById('main-artefak').src = imageUrl;
         alert(`✅ Artefak abadi tersimpan!\nNotasi: “${finalNotasi}”`);
 
-        renderArtefakTray();
-        renderArtefakJournal(); // Perbarui jurnal juga
+        renderArtefakTray(); // Perbarui tray segera
       });
 
       // Modal note
@@ -640,11 +606,10 @@
         const note = document.getElementById('modal-note-input').value.trim();
         const idx = parseInt(modal.dataset.index);
         const artefaks = JSON.parse(localStorage.getItem('nopeArtefaks') || '[]');
-        if (artefaks[idx]) { // Pastikan indeks valid
+        if (artefaks[idx]) {
           artefaks[idx].note = note;
           localStorage.setItem('nopeArtefaks', JSON.stringify(artefaks));
           alert('Catatan disimpan.');
-          renderArtefakJournal(); // Perbarui jurnal juga
         }
         closeModal();
       });
@@ -706,12 +671,26 @@
       `).join('');
     }
 
+    // --- FUNGSI RENDER TRAY YANG DIPERBAIKI ---
+    // Sekarang tray hanya menampilkan 6 artefak PERTAMA (yang paling baru).
     function renderArtefakTray() {
       const tray = document.getElementById('artefak-tray');
       const artefaks = JSON.parse(localStorage.getItem('nopeArtefaks') || '[]');
-      const allArtefaks = [...artefaks, ...DUMMY_ARTEFAK.slice(0, 6 - artefaks.length)];
+      let displayedArtefaks = [];
 
-      tray.innerHTML = allArtefaks.map((item, i) => `
+      // Jika sudah ada artefak nyata, ambil 6 yang terbaru (dari awal array).
+      if (artefaks.length > 0) {
+        displayedArtefaks = artefaks.slice(0, 6);
+        // Jika kurang dari 6, isi sisa slot dengan dummy
+        if (displayedArtefaks.length < 6) {
+          displayedArtefaks = [...displayedArtefaks, ...DUMMY_ARTEFAK.slice(0, 6 - displayedArtefaks.length)];
+        }
+      } else {
+        // Jika belum ada artefak nyata, tampilkan 6 dummy.
+        displayedArtefaks = DUMMY_ARTEFAK.slice(0, 6);
+      }
+
+      tray.innerHTML = displayedArtefaks.map((item, i) => `
         <div class="artefak-item" data-index="${i}">
           <img src="${item.url}" alt="Artefak" />
           <div class="overlay">
@@ -725,31 +704,14 @@
         item.addEventListener('click', () => {
           const idx = parseInt(item.dataset.index);
           const modal = document.getElementById('note-modal');
-          if (allArtefaks[idx]) { // Pastikan indeks valid
-            document.getElementById('modal-artefak-img').src = allArtefaks[idx].url;
-            document.getElementById('modal-note-input').value = allArtefaks[idx].note || '';
+          if (displayedArtefaks[idx]) {
+            document.getElementById('modal-artefak-img').src = displayedArtefaks[idx].url;
+            document.getElementById('modal-note-input').value = displayedArtefaks[idx].note || '';
             modal.dataset.index = idx;
             modal.style.display = 'flex';
           }
         });
       });
-    }
-
-    // FUNGSI BARU: Render Jurnal Artefak
-    function renderArtefakJournal() {
-      const journalList = document.getElementById('artefak-journal-list');
-      const artefaks = JSON.parse(localStorage.getItem('nopeArtefaks') || '[]');
-      const allArtefaks = [...artefaks, ...DUMMY_ARTEFAK.slice(0, 6 - artefaks.length)];
-
-      // Urutkan berdasarkan waktu, terbaru dulu (untuk jurnal)
-      allArtefaks.sort((a, b) => b.time - a.time);
-
-      journalList.innerHTML = allArtefaks.map(item => `
-        <div class="artefak-journal-item">
-          <strong>${item.notasi}</strong>
-          ${item.note ? `<div class="note">${escapeHtml(item.note)}</div>` : ''}
-        </div>
-      `).join('');
     }
 
     function escapeHtml(text) {
