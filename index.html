@@ -557,7 +557,7 @@
         };
 
         const rants = JSON.parse(localStorage.getItem('nopeUserRants') || '[]');
-        rants.unshift(newRant);
+        rants.unshift(newRant); // Tambahkan di awal (paling atas)
         localStorage.setItem('nopeUserRants', JSON.stringify(rants));
 
         document.getElementById('rant-input').value = '';
@@ -618,7 +618,7 @@
         };
 
         const artefaks = JSON.parse(localStorage.getItem('nopeArtefaks') || '[]');
-        artefaks.push(newArtefak);
+        artefaks.unshift(newArtefak); // PERBAIKAN: Tambahkan di awal (paling atas) - INI YANG DIPERBAIKI!
         localStorage.setItem('nopeArtefaks', JSON.stringify(artefaks));
         localStorage.setItem('nopeLastArtefakTime', now.toString());
 
@@ -741,7 +741,7 @@
       const artefaks = JSON.parse(localStorage.getItem('nopeArtefaks') || '[]');
       const allArtefaks = [...artefaks, ...DUMMY_ARTEFAK.slice(0, 6 - artefaks.length)];
 
-      // Urutkan berdasarkan waktu, terbaru dulu
+      // Urutkan berdasarkan waktu, terbaru dulu (untuk jurnal)
       allArtefaks.sort((a, b) => b.time - a.time);
 
       journalList.innerHTML = allArtefaks.map(item => `
