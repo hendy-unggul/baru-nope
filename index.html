@@ -171,6 +171,35 @@
       filter: brightness(0.9);
     }
 
+    /* Jurnal Artefak */
+    .artefak-journal {
+      margin-top: 16px;
+      padding: 12px;
+      background: var(--input-bg);
+      border-radius: var(--radius-10);
+      border-top: 1px solid #222;
+    }
+    .artefak-journal h3 {
+      color: var(--accent);
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .artefak-journal-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #333;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .artefak-journal-item:last-child {
+      border-bottom: none;
+    }
+    .artefak-journal-item .note {
+      color: #aaa;
+      font-style: italic;
+      margin-top: 4px;
+    }
+
     .tagline-gen-z {
       color: #aaa;
       font-style: italic;
@@ -411,6 +440,12 @@
 
     <div class="artefak-tray" id="artefak-tray"></div>
 
+    <!-- JURNAL ARTEFAK - DITAMBAHKAN DI SINI, SEBELUM TAGLINE -->
+    <div class="artefak-journal" id="artefak-journal">
+      <h3>📝 Jurnal Artefak</h3>
+      <div id="artefak-journal-list"></div>
+    </div>
+
     <div class="tagline-gen-z">
       Bukan feed. Bukan timeline. Ini jejakmu yang abadi.
     </div>
@@ -506,6 +541,7 @@
 
       renderFeed();
       renderArtefakTray();
+      renderArtefakJournal(); // Panggil fungsi baru ini
 
       // Rant upload
       document.getElementById('submit-rant').addEventListener('click', () => {
@@ -590,6 +626,7 @@
         alert(`✅ Artefak abadi tersimpan!\nNotasi: “${finalNotasi}”`);
 
         renderArtefakTray();
+        renderArtefakJournal(); // Perbarui jurnal juga
       });
 
       // Modal note
@@ -603,9 +640,12 @@
         const note = document.getElementById('modal-note-input').value.trim();
         const idx = parseInt(modal.dataset.index);
         const artefaks = JSON.parse(localStorage.getItem('nopeArtefaks') || '[]');
-        artefaks[idx].note = note;
-        localStorage.setItem('nopeArtefaks', JSON.stringify(artefaks));
-        alert('Catatan disimpan.');
+        if (artefaks[idx]) { // Pastikan indeks valid
+          artefaks[idx].note = note;
+          localStorage.setItem('nopeArtefaks', JSON.stringify(artefaks));
+          alert('Catatan disimpan.');
+          renderArtefakJournal(); // Perbarui jurnal juga
+        }
         closeModal();
       });
     }
@@ -632,13 +672,14 @@
       "Gue nulis ini bukan minta diselamatin. Cuma biar gak sendiri."
     ];
 
+    // PERBAIKAN: Tambahkan properti emojis ke DUMMY_ARTEFAK
     const DUMMY_ARTEFAK = [
-      { url: "https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=100", note: "Gunung yang menenangkan" },
-      { url: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=100", note: "Senja yang membakar" },
-      { url: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=100", note: "Langit malam" },
-      { url: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=100", note: "Air yang tenang" },
-      { url: "https://images.unsplash.com/photo-1480714378409-634531dbc169?auto=format&fit=crop&w=100", note: "Kabut pagi" },
-      { url: "https://images.unsplash.com/photo-1506260408123-9e6e537a2e05?auto=format&fit=crop&w=100", note: "Senyum sendirian" }
+      { url: "https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=100", note: "Gunung yang menenangkan", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } },
+      { url: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=100", note: "Senja yang membakar", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } },
+      { url: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=100", note: "Langit malam", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } },
+      { url: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=100", note: "Air yang tenang", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } },
+      { url: "https://images.unsplash.com/photo-1480714378409-634531dbc169?auto=format&fit=crop&w=100", note: "Kabut pagi", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } },
+      { url: "https://images.unsplash.com/photo-1506260408123-9e6e537a2e05?auto=format&fit=crop&w=100", note: "Senyum sendirian", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } }
     ];
 
     function renderFeed() {
@@ -684,12 +725,31 @@
         item.addEventListener('click', () => {
           const idx = parseInt(item.dataset.index);
           const modal = document.getElementById('note-modal');
-          document.getElementById('modal-artefak-img').src = allArtefaks[idx].url;
-          document.getElementById('modal-note-input').value = allArtefaks[idx].note || '';
-          modal.dataset.index = idx;
-          modal.style.display = 'flex';
+          if (allArtefaks[idx]) { // Pastikan indeks valid
+            document.getElementById('modal-artefak-img').src = allArtefaks[idx].url;
+            document.getElementById('modal-note-input').value = allArtefaks[idx].note || '';
+            modal.dataset.index = idx;
+            modal.style.display = 'flex';
+          }
         });
       });
+    }
+
+    // FUNGSI BARU: Render Jurnal Artefak
+    function renderArtefakJournal() {
+      const journalList = document.getElementById('artefak-journal-list');
+      const artefaks = JSON.parse(localStorage.getItem('nopeArtefaks') || '[]');
+      const allArtefaks = [...artefaks, ...DUMMY_ARTEFAK.slice(0, 6 - artefaks.length)];
+
+      // Urutkan berdasarkan waktu, terbaru dulu
+      allArtefaks.sort((a, b) => b.time - a.time);
+
+      journalList.innerHTML = allArtefaks.map(item => `
+        <div class="artefak-journal-item">
+          <strong>${item.notasi}</strong>
+          ${item.note ? `<div class="note">${escapeHtml(item.note)}</div>` : ''}
+        </div>
+      `).join('');
     }
 
     function escapeHtml(text) {
