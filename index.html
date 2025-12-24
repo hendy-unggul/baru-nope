@@ -592,7 +592,8 @@
         document.getElementById('main-artefak').src = imageUrl;
         alert(`✅ Artefak abadi tersimpan!\nNotasi: “${finalNotasi}”`);
 
-        renderArtefakTray(); // Perbarui tray segera
+        // --- PENTING: Panggil renderArtefakTray() setelah menyimpan ---
+        renderArtefakTray();
       });
 
       // Modal note
@@ -672,34 +673,38 @@
     }
 
     // --- FUNGSI RENDER TRAY YANG DIPERBAIKI ---
-    // Sekarang tray hanya menampilkan 6 artefak PERTAMA (yang paling baru).
     function renderArtefakTray() {
       const tray = document.getElementById('artefak-tray');
       const artefaks = JSON.parse(localStorage.getItem('nopeArtefaks') || '[]');
       let displayedArtefaks = [];
 
-      // Jika sudah ada artefak nyata, ambil 6 yang terbaru (dari awal array).
-      if (artefaks.length > 0) {
-        displayedArtefaks = artefaks.slice(0, 6);
-        // Jika kurang dari 6, isi sisa slot dengan dummy
-        if (displayedArtefaks.length < 6) {
-          displayedArtefaks = [...displayedArtefaks, ...DUMMY_ARTEFAK.slice(0, 6 - displayedArtefaks.length)];
-        }
-      } else {
-        // Jika belum ada artefak nyata, tampilkan 6 dummy.
-        displayedArtefaks = DUMMY_ARTEFAK.slice(0, 6);
+      // Ambil 6 artefak pertama (yang paling baru)
+      displayedArtefaks = artefaks.slice(0, 6);
+
+      // Jika kurang dari 6, isi sisa slot dengan dummy
+      if (displayedArtefaks.length < 6) {
+        displayedArtefaks = [...displayedArtefaks, ...DUMMY_ARTEFAK.slice(0, 6 - displayedArtefaks.length)];
       }
 
-      tray.innerHTML = displayedArtefaks.map((item, i) => `
-        <div class="artefak-item" data-index="${i}">
-          <img src="${item.url}" alt="Artefak" />
-          <div class="overlay">
-            <div class="counter">😭${item.emojis['😭']} 🔥${item.emojis['🔥']} 🤡${item.emojis['🤡']}</div>
-            <button class="note-btn">📝</button>
+      // Render tray
+      tray.innerHTML = displayedArtefaks.map((item, i) => {
+        // Pastikan item dan url-nya ada untuk mencegah error
+        if (!item || !item.url) {
+          console.error(`Item artefak ke-${i} tidak valid:`, item);
+          return `<div class="artefak-item" data-index="${i}" style="background: #333; display: flex; align-items: center; justify-content: center;"><span>?</span></div>`;
+        }
+        return `
+          <div class="artefak-item" data-index="${i}">
+            <img src="${item.url}" alt="Artefak" />
+            <div class="overlay">
+              <div class="counter">😭${item.emojis['😭']} 🔥${item.emojis['🔥']} 🤡${item.emojis['🤡']}</div>
+              <button class="note-btn">📝</button>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
+      // Tambahkan event listener
       document.querySelectorAll('.artefak-item').forEach(item => {
         item.addEventListener('click', () => {
           const idx = parseInt(item.dataset.index);
