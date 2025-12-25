@@ -95,7 +95,7 @@
       color: var(--white);
       font-weight: bold;
       font-size: 0.85rem;
-      background: rgba(0,0,0,0.2);
+      background: rgba(0,0,0,0.7);
       padding: 4px 8px;
       border-radius: 4px;
       pointer-events: none; /* Agar tidak mengganggu klik pada gambar */
@@ -740,10 +740,19 @@
       `).join('');
     }
 
-    // --- FUNGSI RENDER TRAY YANG DIPERBAIKI SECARA MENYELURUH ---
+    // --- FUNGSI RENDER TRAY YANG DIPERBAIKI SECARA MENYELURUH DAN LEBIH AMAN ---
     function renderArtefakTray() {
       const tray = document.getElementById('artefak-tray');
-      const artefaks = JSON.parse(localStorage.getItem('nopeArtefaks') || '[]');
+      let artefaks = [];
+
+      try {
+        // Coba ambil data dari localStorage
+        artefaks = JSON.parse(localStorage.getItem('nopeArtefaks') || '[]');
+      } catch (error) {
+        console.error("Error parsing nopeArtefaks from localStorage:", error);
+        artefaks = []; // Set ke array kosong jika gagal
+      }
+
       let displayedArtefaks = [];
 
       // Ambil 6 artefak pertama (yang paling baru)
@@ -763,10 +772,28 @@
       // Render tray
       tray.innerHTML = displayedArtefaks.map((item, i) => {
         // Pastikan item dan url-nya ada untuk mencegah error
-        if (!item || !item.url) {
-          console.error(`Item artefak ke-${i} tidak valid:`, item);
+        if (!item || typeof item !== 'object') {
+          console.error(`Item artefak ke-${i} bukan objek:`, item);
           return `<div class="artefak-item" data-index="${i}" style="background: #333; display: flex; align-items: center; justify-content: center;"><span>?</span></div>`;
         }
+
+        // Validasi properti yang dibutuhkan
+        if (!item.url || typeof item.url !== 'string') {
+          console.error(`Item artefak ke-${i} tidak memiliki url yang valid:`, item);
+          return `<div class="artefak-item" data-index="${i}" style="background: #333; display: flex; align-items: center; justify-content: center;"><span>?</span></div>`;
+        }
+
+        if (!item.notasi || typeof item.notasi !== 'string') {
+          console.error(`Item artefak ke-${i} tidak memiliki notasi yang valid:`, item);
+          // Gunakan notasi default jika tidak ada
+          item.notasi = "Artefak";
+        }
+
+        // Pastikan emojis ada
+        if (!item.emojis || typeof item.emojis !== 'object') {
+          item.emojis = { '😭': 0, '🔥': 0, '🤡': 0 };
+        }
+
         return `
           <div class="artefak-item" data-index="${i}">
             <img src="${item.url}" alt="Artefak" />
