@@ -87,6 +87,19 @@
       object-fit: cover;
       filter: brightness(0.85);
     }
+    /* --- REVISI: Tambahkan notasi di bawah gambar --- */
+    .artefak-notasi {
+      position: absolute;
+      bottom: 8px;
+      left: 12px;
+      color: var(--white);
+      font-weight: bold;
+      font-size: 0.85rem;
+      background: rgba(0,0,0,0.7);
+      padding: 4px 8px;
+      border-radius: 4px;
+      pointer-events: none; /* Agar tidak mengganggu klik pada gambar */
+    }
 
     /* --- REVISI 1: CTA ARTEFAK DI BAWAH ARTEFAK CONTAINER --- */
     .cta-row {
@@ -201,6 +214,19 @@
       height: 100%;
       object-fit: cover;
       filter: brightness(0.9);
+    }
+    /* --- REVISI: Tambahkan notasi di bawah gambar di tray --- */
+    .artefak-item .artefak-notasi {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      color: var(--white);
+      font-weight: bold;
+      font-size: 0.75rem;
+      background: rgba(0,0,0,0.7);
+      padding: 2px 4px;
+      border-radius: 4px;
+      pointer-events: none;
     }
 
     /* --- REVISI 4: TAGLINE RAPAT KE ATAS --- */
@@ -403,6 +429,7 @@
     <!-- Artefak window DI ATAS rant box -->
     <div class="artefak-container">
       <img id="main-artefak" src="https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=600&h=480&q=80" alt="Artefak" />
+      <div id="main-artefak-notasi" class="artefak-notasi">Gunung yang menenangkan</div>
     </div>
 
     <!-- --- REVISI 1: CTA ARTEFAK DI BAWAH ARTEFAK CONTAINER --- -->
@@ -599,7 +626,10 @@
         localStorage.setItem('nopeArtefaks', JSON.stringify(artefaks));
         localStorage.setItem('nopeLastArtefakTime', now.toString());
 
+        // --- PERBAIKAN: Perbarui top window ---
         document.getElementById('main-artefak').src = imageUrl;
+        document.getElementById('main-artefak-notasi').textContent = finalNotasi;
+
         alert(`✅ Artefak abadi tersimpan!\nNotasi: “${finalNotasi}”`);
 
         // --- PENTING: Panggil renderArtefakTray() setelah menyimpan ---
@@ -648,8 +678,7 @@
       "Gue nulis ini bukan minta diselamatin. Cuma biar gak sendiri."
     ];
 
-    // --- PERBAIKAN: HAPUS DUMMY_ARTEFAK DAN GANTI DENGAN FUNGSI UNTUK MEMBUATNYA ---
-    // Fungsi untuk membuat artefak dummy jika diperlukan
+    // --- FUNGSI UNTUK MEMBUAT ARTEFAK DUMMY ---
     function getDummyArtefak(index) {
       const dummyUrls = [
         "https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=100",
@@ -670,6 +699,7 @@
 
       return {
         url: dummyUrls[index % dummyUrls.length],
+        notasi: dummyNotes[index % dummyNotes.length], // Gunakan properti 'notasi'
         note: dummyNotes[index % dummyNotes.length],
         emojis: { '😭': 0, '🔥': 0, '🤡': 0 }
       };
@@ -744,6 +774,8 @@
               <div class="counter">😭${item.emojis['😭']} 🔥${item.emojis['🔥']} 🤡${item.emojis['🤡']}</div>
               <button class="note-btn">📝</button>
             </div>
+            <!-- --- REVISI: Tambahkan notasi di bawah gambar --- -->
+            <div class="artefak-notasi">${item.notasi}</div>
           </div>
         `;
       }).join('');
