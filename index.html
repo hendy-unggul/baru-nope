@@ -12,7 +12,6 @@
       --white: #ffffff;
       --accent-blue: #4903fc;
       --logo-red: #ff9999;
-      --font-size: 16px;
       --border-radius: 12px;
     }
     * {
@@ -32,8 +31,6 @@
       font-weight: 700;
       color: var(--logo-red);
       margin-bottom: 24px;
-      display: flex;
-      align-items: center;
     }
     .header {
       margin-bottom: 32px;
@@ -50,12 +47,11 @@
       border-radius: var(--border-radius);
       background: #111;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.2s ease;
     }
     .artefak-card:hover,
     .artefak-card:focus {
       transform: scale(1.02);
-      box-shadow: 0 4px 12px rgba(73, 3, 252, 0.3);
     }
     .artefak-card img {
       width: 100%;
@@ -111,7 +107,7 @@
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: var(--border-radius);
       color: white;
-      font-size: var(--font-size);
+      font-size: 16px;
       margin-bottom: 16px;
     }
     input[type="text"]::placeholder {
@@ -124,7 +120,7 @@
       color: white;
       border: none;
       border-radius: var(--border-radius);
-      font-size: var(--font-size);
+      font-size: 16px;
       font-weight: 600;
       cursor: pointer;
     }
@@ -138,7 +134,7 @@
     <div id="login-view" class="login-form">
       <div class="logo">NOPE</div>
       <h1>Masuk dengan username</h1>
-      <input type="text" id="username-input" placeholder="Masukkan username (2 kata)" maxlength="30" />
+      <input type="text" id="username-input" placeholder="Contoh: senja nope" maxlength="30" />
       <button id="login-btn">Masuk</button>
     </div>
 
@@ -147,26 +143,30 @@
       <div class="header">
         <div class="greeting" id="greeting">Hello @user</div>
       </div>
-
       <div class="artefak-tray" id="artefak-tray">
         <!-- 6 artefak akan muncul di sini -->
       </div>
     </div>
   </div>
 
-  <!-- Supabase JS -->
+  <!-- Supabase JS (versi aman untuk incognito) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    // 🔑 GANTI DENGAN PROJECT URL DAN ANON KEY
-    const supabaseUrl = 'https://YOUR_PROJECT.supabase.co';
-    const supabaseAnonKey = 'YOUR_ANON_KEY';
-    const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+    // 🔑 GANTI DENGAN DATA SUPABASE-MU
+    const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
 
-    // Simulasi auth sederhana (tanpa password)
+    // Inisialisasi Supabase hanya sekali
+    if (typeof window.supabase === 'undefined') {
+      const { createClient } = supabase;
+      window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // State
     let currentUser = null;
 
-    // DOM Elements
+    // DOM
     const loginView = document.getElementById('login-view');
     const mainView = document.getElementById('main-view');
     const usernameInput = document.getElementById('username-input');
@@ -174,83 +174,88 @@
     const greetingEl = document.getElementById('greeting');
     const artefakTray = document.getElementById('artefak-tray');
 
+    // Muat user dari localStorage saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('currentUser');
+      if (saved) {
+        currentUser = JSON.parse(saved);
+        greetingEl.textContent = `Hello @${currentUser.username}`;
+        loginView.classList.add('hidden');
+        mainView.classList.remove('hidden');
+        loadArtefaks();
+      }
+    });
+
     // Login
     loginBtn.addEventListener('click', () => {
       const username = usernameInput.value.trim();
       if (!username || username.split(' ').length !== 2) {
-        alert('Username harus terdiri dari 2 kata!');
+        alert('Username harus terdiri dari 2 kata, misal: "senja nope"');
         return;
       }
       currentUser = { username };
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
       greetingEl.textContent = `Hello @${username}`;
       loginView.classList.add('hidden');
       mainView.classList.remove('hidden');
       loadArtefaks();
     });
 
-    // Load 6 artefak terbaru
+    // Muat artefak
     async function loadArtefaks() {
       artefakTray.innerHTML = '';
 
+      // Buat 6 slot (1 upload + 5 placeholder)
       for (let i = 0; i < 6; i++) {
         const card = document.createElement('div');
         card.className = 'artefak-card';
-
         if (i === 0) {
-          // Slot pertama = tombol upload
-          const uploadBtn = document.createElement('div');
-          uploadBtn.className = 'upload-btn';
-          uploadBtn.textContent = 'Unggah';
-          uploadBtn.addEventListener('click', uploadArtefak);
-          card.appendChild(uploadBtn);
+          const btn = document.createElement('div');
+          btn.className = 'upload-btn';
+          btn.textContent = 'Unggah';
+          btn.addEventListener('click', uploadArtefak);
+          card.appendChild(btn);
         } else {
-          // Placeholder artefak
-          const img = document.createElement('div');
-          img.style.backgroundColor = '#222';
-          img.style.width = '100%';
-          img.style.height = '100%';
-          img.style.display = 'flex';
-          img.style.alignItems = 'center';
-          img.style.justifyContent = 'center';
-          img.style.color = '#555';
-          img.textContent = '—';
-          card.appendChild(img);
+          const placeholder = document.createElement('div');
+          placeholder.style.backgroundColor = '#222';
+          placeholder.style.display = 'flex';
+          placeholder.style.alignItems = 'center';
+          placeholder.style.justifyContent = 'center';
+          placeholder.style.color = '#555';
+          placeholder.style.height = '100%';
+          placeholder.textContent = '—';
+          card.appendChild(placeholder);
         }
-
         artefakTray.appendChild(card);
       }
 
-      // Ambil artefak asli dari database
-      const { data, error } = await supabase
+      // Ambil artefak asli
+      const { data, error } = await window.supabase
         .from('artefaks')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(5); // 5 + 1 slot upload = 6
+        .limit(5);
 
-      if (error) {
-        console.error('Gagal ambil artefak:', error);
-        return;
-      }
-
-      // Tampilkan artefak asli (ganti placeholder, kecuali slot upload)
-      const cards = artefakTray.querySelectorAll('.artefak-card');
-      data.forEach((artefak, idx) => {
-        if (idx + 1 < cards.length) {
-          const card = cards[idx + 1];
-          card.innerHTML = '';
-          const img = document.createElement('img');
-          img.src = artefak.image_url;
-          img.alt = 'Artefak';
-          img.loading = 'lazy';
-          card.appendChild(img);
-          if (artefak.notasi) {
-            const notasi = document.createElement('div');
-            notasi.className = 'notasi';
-            notasi.textContent = artefak.notasi;
-            card.appendChild(notasi);
+      if (!error && data) {
+        const cards = artefakTray.querySelectorAll('.artefak-card');
+        data.forEach((artefak, idx) => {
+          if (idx + 1 < cards.length) {
+            const card = cards[idx + 1];
+            card.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = artefak.image_url;
+            img.alt = 'Artefak';
+            img.loading = 'lazy';
+            card.appendChild(img);
+            if (artefak.notasi) {
+              const notasi = document.createElement('div');
+              notasi.className = 'notasi';
+              notasi.textContent = artefak.notasi;
+              card.appendChild(notasi);
+            }
           }
-        }
-      });
+        });
+      }
     }
 
     // Upload artefak
@@ -262,28 +267,25 @@
         const file = e.target.files[0];
         if (!file) return;
 
-        // Upload ke Storage
         const filePath = `public/${currentUser.username.replace(/\s+/g, '_')}/${Date.now()}.jpg`;
-        const { data, error } = await supabase.storage
+        const { data, error } = await window.supabase.storage
           .from('artefak')
           .upload(filePath, file, { contentType: 'image/jpeg', upsert: false });
 
         if (error) {
-          console.error('Upload gagal:', error);
           alert('Gagal upload. Coba lagi!');
+          console.error(error);
           return;
         }
 
-        // Dapatkan URL publik
-        const { data: { publicUrl } } = supabase.storage
+        const { data: { publicUrl } } = window.supabase.storage
           .from('artefak')
           .getPublicUrl(data.path);
 
-        // Simpan ke tabel
-        const notasi = prompt('Masukkan notasi (maks 4 kata):', 'Kenangan abadi');
+        const notasi = prompt('Masukkan notasi (maks 4 kata):', 'Senja abadi');
         if (!notasi) return;
 
-        const { error: insertError } = await supabase
+        const { error: insertError } = await window.supabase
           .from('artefaks')
           .insert({
             user_id: currentUser.username,
@@ -293,22 +295,14 @@
           });
 
         if (insertError) {
-          console.error('Gagal simpan ke tabel:', insertError);
-          alert('Gagal menyimpan metadata.');
+          alert('Gagal simpan metadata.');
+          console.error(insertError);
         } else {
-          loadArtefaks(); // Refresh
+          loadArtefaks();
         }
       };
       input.click();
     }
-
-    // Cegah double-click di upload
-    document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('upload-btn')) {
-        e.target.style.pointerEvents = 'none';
-        setTimeout(() => e.target.style.pointerEvents = 'auto', 1000);
-      }
-    });
   </script>
 </body>
 </html>
