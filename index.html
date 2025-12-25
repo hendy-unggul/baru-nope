@@ -157,8 +157,11 @@
     const SUPABASE_URL = 'https://nmgquhrqfdbhhmcntrwx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tcWN1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUwNTQzMzMsImV4cCI6MjA1MDYzMDMzM30.eL7W8b4K7rN7vT8tDf9P3e3o1gXz3V3m';
 
-    // Inisialisasi Supabase
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Inisialisasi Supabase hanya sekali
+    if (typeof window.supabase === 'undefined') {
+      const { createClient } = supabase;
+      window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
 
     let currentUser = null;
 
@@ -219,8 +222,8 @@
         artefakTray.appendChild(card);
       }
 
-      // ✅ Gunakan supabase.from (bukan window.supabase.from)
-      const { data, error } = await supabase
+      // ✅ Gunakan window.supabase.from
+      const { data, error } = await window.supabase
         .from('artefaks')
         .select('*')
         .order('created_at', { ascending: false })
@@ -257,7 +260,7 @@
         if (!file) return;
 
         const filePath = `public/${currentUser.username.replace(/\s+/g, '_')}/${Date.now()}.jpg`;
-        const { data, error } = await supabase.storage
+        const { data, error } = await window.supabase.storage
           .from('artefak')
           .upload(filePath, file, { contentType: 'image/jpeg', upsert: false });
 
@@ -267,7 +270,7 @@
           return;
         }
 
-        const {  publicUrlData } = supabase.storage
+        const {  publicUrlData } = window.supabase.storage
           .from('artefak')
           .getPublicUrl(data.path);
         const publicUrl = publicUrlData.publicUrl;
@@ -275,8 +278,8 @@
         const notasi = prompt('Masukkan notasi (maks 4 kata):', 'Senja abadi');
         if (!notasi) return;
 
-        // ✅ Gunakan supabase.from (bukan window.supabase.from)
-        const { error: insertError } = await supabase
+        // ✅ Gunakan window.supabase.from
+        const { error: insertError } = await window.supabase
           .from('artefaks')
           .insert({
             user_id: currentUser.username,
