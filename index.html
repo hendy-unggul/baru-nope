@@ -37,7 +37,6 @@
       overflow-x: hidden;
     }
     
-    /* Container dinamis sesuai lebar handphone */
     .container {
       width: 100%;
       max-width: 428px;
@@ -45,7 +44,7 @@
       padding: 20px;
     }
     
-    /* Header Styles - Logo saja, Hello @username dipindah */
+    /* Header */
     .header {
       display: flex;
       justify-content: space-between;
@@ -115,7 +114,6 @@
       width: 100%;
     }
     
-    /* Posisi Hello @username di atas artefak */
     .user-greeting {
       font-size: 20px;
       font-weight: 600;
@@ -215,7 +213,7 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    /* CTA Upload Button - di kanan bawah artefak */
+    /* Upload FAB */
     .upload-fab {
       position: absolute;
       bottom: 16px;
@@ -233,9 +231,10 @@
       transition: all 0.2s ease;
       box-shadow: 0 4px 12px rgba(73, 3, 252, 0.3);
       z-index: 10;
+      font-size: 24px;
     }
     
-    .upload-fab:hover {
+    .upload-fab:hover:not(:disabled) {
       transform: scale(1.05);
       box-shadow: 0 6px 16px rgba(73, 3, 252, 0.4);
     }
@@ -251,11 +250,7 @@
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
     
-    .upload-icon {
-      font-size: 24px;
-    }
-    
-    /* Cooldown info lebih minimalis */
+    /* Cooldown info */
     .cooldown-info {
       margin-top: 8px;
       font-size: 12px;
@@ -300,6 +295,8 @@
       line-height: 1.5;
       resize: none;
       font-family: inherit;
+      padding: 0;
+      margin-bottom: 40px;
     }
     
     .rant-textarea::placeholder {
@@ -310,8 +307,9 @@
     .rant-hint {
       font-size: 12px;
       color: var(--gray-400);
-      margin-top: 8px;
-      text-align: center;
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
     }
     
     .rant-counter {
@@ -339,6 +337,7 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      margin-top: 40px;
     }
     
     .send-rant-btn:hover:not(:disabled) {
@@ -350,7 +349,7 @@
       cursor: not-allowed;
     }
     
-    /* Rant Feed Window */
+    /* Rant Feed */
     .rant-feed {
       background: var(--gray-800);
       border: 1px solid var(--gray-600);
@@ -409,6 +408,8 @@
       font-size: 15px;
       line-height: 1.6;
       color: var(--white);
+      white-space: pre-wrap;
+      word-break: break-word;
     }
     
     .rant-empty {
@@ -423,7 +424,7 @@
       opacity: 0.5;
     }
     
-    /* Artefak History */
+    /* History */
     .history-section {
       margin-top: 40px;
     }
@@ -482,7 +483,7 @@
       font-size: 24px;
     }
     
-    /* Modal Styles */
+    /* Modal */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -557,7 +558,7 @@
       border: 1px solid var(--gray-600);
     }
     
-    /* Form Styles */
+    /* Form */
     .form-group {
       margin-bottom: 20px;
     }
@@ -601,6 +602,7 @@
       cursor: pointer;
       transition: border-color 0.2s;
       position: relative;
+      padding: 40px 20px;
     }
     
     .file-input-label:hover {
@@ -617,7 +619,6 @@
       color: var(--gray-400);
       font-size: 16px;
       text-align: center;
-      padding: 40px 20px;
     }
     
     .file-input {
@@ -655,16 +656,11 @@
       text-overflow: ellipsis;
     }
     
-    /* Utility Classes */
+    /* Utility */
     .hidden {
       display: none !important;
     }
     
-    .text-center {
-      text-align: center;
-    }
-    
-    /* Tab Content */
     .tab-content {
       display: none;
     }
@@ -673,7 +669,7 @@
       display: block;
     }
     
-    /* Scrollbar styling */
+    /* Scrollbar */
     .rant-feed::-webkit-scrollbar {
       width: 6px;
     }
@@ -719,7 +715,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- Header - Logo dan actions saja -->
+    <!-- Header -->
     <div class="header">
       <div class="logo">NOPE</div>
       <div class="header-actions">
@@ -728,7 +724,7 @@
       </div>
     </div>
     
-    <!-- Navigation Tabs -->
+    <!-- Navigation -->
     <div class="nav-tabs">
       <div class="nav-tab active" data-tab="jejak">Jejak</div>
       <div class="nav-tab" data-tab="jalan">Jalan</div>
@@ -736,11 +732,9 @@
       <div class="nav-tab" data-tab="jelajah">Jelajah</div>
     </div>
     
-    <!-- Jejak Tab Content -->
+    <!-- Jejak Tab -->
     <div id="jejak-tab" class="tab-content active">
-      <!-- Main Artefak Section -->
       <div class="main-artefak-container">
-        <!-- Hello @username dipindah di sini -->
         <div class="user-greeting">
           <div class="user-avatar" id="user-avatar">SN</div>
           <span id="greeting">Hello @senja</span>
@@ -748,22 +742,20 @@
         
         <div class="main-artefak-wrapper">
           <div class="main-artefak" id="main-artefak">
-            <!-- Artefak utama akan dimuat di sini -->
+            <!-- Artefak akan dimuat di sini -->
           </div>
           
-          <!-- CTA Upload FAB di kanan bawah artefak -->
           <button class="upload-fab" id="upload-fab" title="Unggah">
-            <span class="upload-icon">+</span>
+            +
           </button>
         </div>
         
-        <!-- Cooldown info minimalis -->
         <div class="cooldown-info" id="cooldown-info">
           Dapat diunggah: <span class="cooldown-timer" id="cooldown-timer">30 hari</span>
         </div>
       </div>
       
-      <!-- Rant Box Section -->
+      <!-- Rant Section -->
       <div class="rant-section">
         <div class="rant-box-container">
           <textarea 
@@ -784,28 +776,27 @@
           </button>
         </div>
         
-        <!-- Rant Feed Window -->
         <div class="rant-feed" id="rant-feed">
           <div class="rant-feed-header">
             <div class="rant-feed-title">Rant Terbaru</div>
             <div class="rant-feed-count" id="rant-count">0 rant</div>
           </div>
           <div class="rant-feed-content" id="rant-feed-content">
-            <!-- Rant items akan dimuat di sini -->
+            <!-- Rant akan dimuat di sini -->
           </div>
         </div>
       </div>
       
-      <!-- Artefak History -->
+      <!-- History -->
       <div class="history-section">
         <div class="history-label">Riwayat Artefak</div>
         <div class="history-grid" id="history-grid">
-          <!-- Riwayat artefak akan dimuat di sini -->
+          <!-- History akan dimuat di sini -->
         </div>
       </div>
     </div>
     
-    <!-- Other Tabs (Placeholder) -->
+    <!-- Other Tabs -->
     <div id="jalan-tab" class="tab-content">
       <div style="text-align: center; padding: 60px 20px; color: var(--gray-400);">
         🛣️ Halaman Jalan akan segera hadir
@@ -841,7 +832,7 @@
               <div class="file-input-text" style="font-size: 12px; margin-top: 8px;">
                 Foto akan ditampilkan dengan tinggi 70% dari lebar
               </div>
-              <input type="file" id="file-input" class="file-input" accept="image/*" capture="environment">
+              <input type="file" id="file-input" class="file-input" accept="image/*">
             </label>
             <div id="image-preview" class="preview-container hidden">
               <!-- Preview akan diisi oleh JavaScript -->
@@ -889,30 +880,21 @@
     
     // ============ ELEMENTS ============
     const elements = {
-      // Header
       greeting: document.getElementById('greeting'),
       userAvatar: document.getElementById('user-avatar'),
-      
-      // Navigation
       navTabs: document.querySelectorAll('.nav-tab'),
       tabContents: document.querySelectorAll('.tab-content'),
-      
-      // Jejak Tab
       mainArtefak: document.getElementById('main-artefak'),
       uploadFab: document.getElementById('upload-fab'),
       cooldownInfo: document.getElementById('cooldown-info'),
       cooldownTimer: document.getElementById('cooldown-timer'),
       historyGrid: document.getElementById('history-grid'),
-      
-      // Rant Elements
       rantTextarea: document.getElementById('rant-textarea'),
       rantCounter: document.getElementById('rant-counter'),
       sendRantBtn: document.getElementById('send-rant-btn'),
       rantFeed: document.getElementById('rant-feed'),
       rantFeedContent: document.getElementById('rant-feed-content'),
       rantCount: document.getElementById('rant-count'),
-      
-      // Upload Modal
       uploadModal: document.getElementById('upload-modal'),
       fileInputLabel: document.getElementById('file-input-label'),
       fileInput: document.getElementById('file-input'),
@@ -922,58 +904,6 @@
       cancelBtn: document.getElementById('cancel-btn'),
       submitBtn: document.getElementById('submit-btn')
     };
-    
-    // ============ FUNGSI UTILITAS ============
-    
-    // Hitung tinggi berdasarkan 70% dari lebar artefak
-    function calculateArtefakHeight() {
-      const artefakWidth = elements.mainArtefak.offsetWidth;
-      if (!artefakWidth || artefakWidth === 0) {
-        const container = document.querySelector('.container');
-        return Math.floor((container.offsetWidth - 40) * 0.7);
-      }
-      return Math.floor(artefakWidth * 0.7);
-    }
-    
-    // Set tinggi elemen artefak
-    function setArtefakHeight(element, height) {
-      if (element) {
-        element.style.height = `${height}px`;
-      }
-    }
-    
-    // Format tanggal untuk rant
-    function formatRantDate(dateString) {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffMs = now - date;
-      const diffMins = Math.floor(diffMs / 60000);
-      const diffHours = Math.floor(diffMs / 3600000);
-      const diffDays = Math.floor(diffMs / 86400000);
-      
-      if (diffMins < 60) {
-        return `${diffMins}m lalu`;
-      } else if (diffHours < 24) {
-        return `${diffHours}j lalu`;
-      } else if (diffDays < 7) {
-        return `${diffDays}h lalu`;
-      } else {
-        return date.toLocaleDateString('id-ID', {
-          day: 'numeric',
-          month: 'short'
-        });
-      }
-    }
-    
-    // Generate avatar initials
-    function generateAvatarInitials(username) {
-      return username
-        .split(' ')
-        .map(word => word[0])
-        .join('')
-        .toUpperCase()
-        .substring(0, 2);
-    }
     
     // ============ INITIALIZE ============
     async function initializeApp() {
@@ -985,8 +915,19 @@
           throw new Error('Supabase library not loaded!');
         }
         
-        // 2. Inisialisasi Supabase Client
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // 2. Inisialisasi Supabase Client dengan konfigurasi yang benar
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+          },
+          global: {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY
+            }
+          }
+        });
+        
         console.log('✅ Supabase initialized');
         
         // 3. Setup Event Listeners
@@ -1022,28 +963,45 @@
         
       } catch (error) {
         console.error('❌ Initialization error:', error);
-        alert('Gagal memuat aplikasi. Silakan refresh halaman.');
+        showError('Gagal memuat aplikasi. Silakan refresh halaman.');
       }
     }
     
-    // Update UI user
     function updateUserUI() {
-      elements.greeting.textContent = `Hello @${currentUser.username.split(' ')[0]}`;
+      const firstName = currentUser.username.split(' ')[0];
+      elements.greeting.textContent = `Hello @${firstName}`;
       elements.userAvatar.textContent = generateAvatarInitials(currentUser.username);
     }
     
-    // Update tinggi artefak
+    function generateAvatarInitials(username) {
+      return username
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
+    }
+    
+    function calculateArtefakHeight() {
+      const artefakWidth = elements.mainArtefak.offsetWidth;
+      if (!artefakWidth || artefakWidth === 0) {
+        const container = document.querySelector('.container');
+        return Math.floor((container.offsetWidth - 40) * 0.7);
+      }
+      return Math.floor(artefakWidth * 0.7);
+    }
+    
     function updateArtefakHeight() {
       const height = calculateArtefakHeight();
       
       const mainImage = elements.mainArtefak.querySelector('.main-artefak-image');
       if (mainImage) {
-        setArtefakHeight(mainImage, height);
+        mainImage.style.height = `${height}px`;
       }
       
       const placeholder = elements.mainArtefak.querySelector('.main-artefak-placeholder');
       if (placeholder) {
-        setArtefakHeight(placeholder, height);
+        placeholder.style.height = `${height}px`;
       }
     }
     
@@ -1060,7 +1018,7 @@
         });
       });
       
-      // Upload FAB Button
+      // Upload FAB
       elements.uploadFab.addEventListener('click', () => {
         if (elements.uploadFab.classList.contains('uploaded')) {
           alert('Anda sudah mengunggah artefak bulan ini. Tunggu 30 hari untuk mengubahnya.');
@@ -1069,17 +1027,16 @@
         showUploadModal();
       });
       
-      // Rant Textarea events
+      // Rant Textarea
       elements.rantTextarea.addEventListener('input', updateRantCounter);
       elements.rantTextarea.addEventListener('keydown', (e) => {
-        // Ctrl/Cmd + Enter untuk submit
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
           e.preventDefault();
           submitRant();
         }
       });
       
-      // Send Rant Button
+      // Send Rant
       elements.sendRantBtn.addEventListener('click', submitRant);
       
       // File Input
@@ -1090,15 +1047,15 @@
       
       // Modal Buttons
       elements.cancelBtn.addEventListener('click', hideUploadModal);
-      elements.submitBtn.addEventListener('click', submitArtefak);
+      elements.submitBtn.addEventListener('click', handleUploadSubmit);
       
-      // Resize window
+      // Resize
       window.addEventListener('resize', debounce(() => {
         updateArtefakHeight();
         updatePreviewHeight();
       }, 250));
       
-      // Observer untuk perubahan ukuran
+      // Resize Observer
       if (typeof ResizeObserver !== 'undefined') {
         const resizeObserver = new ResizeObserver(() => {
           updateArtefakHeight();
@@ -1111,7 +1068,6 @@
       }
     }
     
-    // Debounce function
     function debounce(func, wait) {
       let timeout;
       return function executedFunction(...args) {
@@ -1126,40 +1082,45 @@
     
     // ============ RANT MANAGEMENT ============
     function updateRantCounter() {
-      const text = elements.rantTextarea.value.trim();
+      const text = elements.rantTextarea.value;
       const length = text.length;
       const maxLength = 300;
       
       elements.rantCounter.textContent = `${length}/${maxLength}`;
       
-      // Update warning state
-      if (length > maxLength * 0.8) { // 80% of max
+      if (length > maxLength * 0.8) {
         elements.rantCounter.classList.add('warning');
       } else {
         elements.rantCounter.classList.remove('warning');
       }
       
-      // Enable/disable send button
       elements.sendRantBtn.disabled = length === 0 || length > maxLength;
     }
     
     async function loadRants() {
       try {
+        if (!currentMainArtefak) {
+          rants = [];
+          renderRantFeed();
+          return;
+        }
+        
         const { data, error } = await supabaseClient
           .from('rants')
           .select('*')
-          .eq('user_id', currentUser.id)
-          .eq('artefak_id', currentMainArtefak?.id || '')
+          .eq('artefak_id', currentMainArtefak.id)
           .order('created_at', { ascending: false })
           .limit(5);
         
-        if (!error && data) {
-          rants = data;
-          renderRantFeed();
-        } else {
+        if (error) {
+          console.error('Error loading rants:', error);
           rants = [];
-          renderRantFeed();
+        } else {
+          rants = data || [];
         }
+        
+        renderRantFeed();
+        
       } catch (error) {
         console.error('❌ Error loading rants:', error);
         rants = [];
@@ -1198,13 +1159,9 @@
         
         if (error) throw error;
         
-        // Add to local array
         rants.unshift(data);
-        
-        // Update UI
         renderRantFeed();
         
-        // Clear textarea
         elements.rantTextarea.value = '';
         updateRantCounter();
         
@@ -1241,12 +1198,44 @@
       rants.forEach(rant => {
         const rantItem = document.createElement('div');
         rantItem.className = 'rant-item';
+        
+        const date = new Date(rant.created_at);
+        const timeAgo = getTimeAgo(date);
+        
         rantItem.innerHTML = `
-          <div class="rant-date">${formatRantDate(rant.created_at)}</div>
-          <div class="rant-text">${rant.text.replace(/\n/g, '<br>')}</div>
+          <div class="rant-date">${timeAgo}</div>
+          <div class="rant-text">${escapeHtml(rant.text)}</div>
         `;
+        
         elements.rantFeedContent.appendChild(rantItem);
       });
+    }
+    
+    function getTimeAgo(date) {
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      
+      if (diffMins < 60) {
+        return `${diffMins}m lalu`;
+      } else if (diffHours < 24) {
+        return `${diffHours}j lalu`;
+      } else if (diffDays < 7) {
+        return `${diffDays}h lalu`;
+      } else {
+        return date.toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'short'
+        });
+      }
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
     
     // ============ JEJAK DATA MANAGEMENT ============
@@ -1267,11 +1256,11 @@
           currentMainArtefak = mainData;
           renderMainArtefak(mainData);
           elements.uploadFab.classList.add('uploaded');
-          elements.uploadFab.title = 'Artefak Terunggah';
+          elements.uploadFab.disabled = true;
         } else {
           renderMainArtefakPlaceholder();
           elements.uploadFab.classList.remove('uploaded');
-          elements.uploadFab.title = 'Unggah Artefak';
+          elements.uploadFab.disabled = false;
         }
         
         // Load history
@@ -1463,8 +1452,8 @@
       return isValid;
     }
     
-    // ============ SUBMIT ARTEFAK ============
-    async function submitArtefak() {
+    // ============ UPLOAD HANDLER ============
+    async function handleUploadSubmit() {
       if (!validateForm()) {
         alert('Harap lengkapi form dengan benar. Notasi maksimal 4 kata.');
         return;
@@ -1479,9 +1468,14 @@
         elements.submitBtn.disabled = true;
         elements.submitBtn.textContent = 'Mengunggah...';
         
+        console.log('📤 Starting upload process...');
+        
+        // 1. Upload ke Storage
         const fileExt = selectedFile.name.split('.').pop();
         const fileName = `${currentUser.id}_jejak_${Date.now()}.${fileExt}`;
         const filePath = `jejak/${fileName}`;
+        
+        console.log('📁 Uploading file:', filePath);
         
         const { data: uploadData, error: uploadError } = await supabaseClient
           .storage
@@ -1491,23 +1485,48 @@
             upsert: false
           });
         
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('❌ Storage upload error:', uploadError);
+          
+          // Cek jika bucket belum ada atau policy error
+          if (uploadError.message.includes('bucket') || uploadError.statusCode === 400) {
+            alert('Error: Bucket "artefak" belum disetup. Buka Supabase Storage dan buat bucket "artefak" terlebih dahulu.');
+          } else if (uploadError.statusCode === 401 || uploadError.statusCode === 403) {
+            alert('Error: Akses ditolak. Cek storage policy di Supabase Dashboard.');
+          }
+          
+          throw uploadError;
+        }
         
+        console.log('✅ File uploaded successfully:', uploadData);
+        
+        // 2. Dapatkan public URL
         const { data: urlData } = supabaseClient
           .storage
           .from('artefak')
           .getPublicUrl(filePath);
         
+        console.log('🔗 Public URL:', urlData.publicUrl);
+        
+        // 3. Simpan ke database
         const now = new Date().toISOString();
         const notasi = elements.notasiInput.value.trim();
         
+        // Nonaktifkan artefak utama sebelumnya jika ada
         if (currentMainArtefak) {
-          await supabaseClient
+          console.log('🔄 Deactivating previous main artefak:', currentMainArtefak.id);
+          const { error: updateError } = await supabaseClient
             .from('artefaks')
             .update({ is_main: false })
             .eq('id', currentMainArtefak.id);
+          
+          if (updateError) {
+            console.error('❌ Error deactivating previous artefak:', updateError);
+          }
         }
         
+        // Insert artefak baru
+        console.log('💾 Saving to database...');
         const { data: insertData, error: insertError } = await supabaseClient
           .from('artefaks')
           .insert({
@@ -1522,22 +1541,35 @@
           .select()
           .single();
         
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error('❌ Database insert error:', insertError);
+          throw insertError;
+        }
         
+        console.log('✅ Artefak saved to database:', insertData);
+        
+        // 4. Update UI
         currentMainArtefak = insertData;
         renderMainArtefak(insertData);
         elements.uploadFab.classList.add('uploaded');
-        elements.uploadFab.title = 'Artefak Terunggah';
+        elements.uploadFab.disabled = true;
         
+        // 5. Reload data
         await loadJejakData();
+        await loadRants();
+        
+        // 6. Sembunyikan modal
         hideUploadModal();
         
+        // 7. Tampilkan success message
         alert('✅ Artefak Jejak berhasil diunggah!');
+        
+        // 8. Set cooldown
         setCooldown();
         
       } catch (error) {
-        console.error('❌ Upload error:', error);
-        alert('Gagal mengunggah artefak. Silakan coba lagi.');
+        console.error('❌ Upload process failed:', error);
+        alert('Gagal mengunggah artefak: ' + (error.message || 'Unknown error'));
       } finally {
         elements.submitBtn.disabled = false;
         elements.submitBtn.textContent = 'Unggah';
@@ -1581,6 +1613,10 @@
           elements.uploadFab.disabled = false;
         }
       }
+    }
+    
+    function showError(message) {
+      alert(message);
     }
     
     // ============ START APP ============
