@@ -149,25 +149,21 @@
     </div>
   </div>
 
-  <!-- Supabase JS (versi aman untuk incognito) -->
+  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    // 🔑 GANTI DENGAN DATA SUPABASE-MU
+    // 🔑 GANTI DUA BARIS INI DENGAN DATA DARI DASHBOARD SUPABASE-MU
     const SUPABASE_URL = 'https://nmgquhrqfdbhhmcntrwx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZ3F1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2MjIzNjUsImV4cCI6MjA4MjE5ODM2NX0.0EMNhWe8dEA7fb7ydqo2ek3kKFefYhmTiEIa09A71DU
-';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZ3F1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2MjIzNjUsImV4cCI6MjA4MjE5ODM2NX0.0EMNhWe8dEA7fb7ydqo2ek3kKFefYhmTiEIa09A71DU';
 
-    // Inisialisasi Supabase hanya sekali
-    if (typeof window.supabase === 'undefined') {
-      const { createClient } = supabase;
-      window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Pastikan Supabase hanya diinisialisasi sekali
+    if (!window.supabase) {
+      window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
-    // State
     let currentUser = null;
 
-    // DOM
     const loginView = document.getElementById('login-view');
     const mainView = document.getElementById('main-view');
     const usernameInput = document.getElementById('username-input');
@@ -175,7 +171,6 @@
     const greetingEl = document.getElementById('greeting');
     const artefakTray = document.getElementById('artefak-tray');
 
-    // Muat user dari localStorage saat halaman dimuat
     document.addEventListener('DOMContentLoaded', () => {
       const saved = localStorage.getItem('currentUser');
       if (saved) {
@@ -187,7 +182,6 @@
       }
     });
 
-    // Login
     loginBtn.addEventListener('click', () => {
       const username = usernameInput.value.trim();
       if (!username || username.split(' ').length !== 2) {
@@ -202,11 +196,8 @@
       loadArtefaks();
     });
 
-    // Muat artefak
     async function loadArtefaks() {
       artefakTray.innerHTML = '';
-
-      // Buat 6 slot (1 upload + 5 placeholder)
       for (let i = 0; i < 6; i++) {
         const card = document.createElement('div');
         card.className = 'artefak-card';
@@ -230,7 +221,6 @@
         artefakTray.appendChild(card);
       }
 
-      // Ambil artefak asli
       const { data, error } = await window.supabase
         .from('artefaks')
         .select('*')
@@ -259,7 +249,6 @@
       }
     }
 
-    // Upload artefak
     async function uploadArtefak() {
       const input = document.createElement('input');
       input.type = 'file';
@@ -279,7 +268,7 @@
           return;
         }
 
-        const { data: { publicUrl } } = window.supabase.storage
+        const {  { publicUrl } } = window.supabase.storage
           .from('artefak')
           .getPublicUrl(data.path);
 
