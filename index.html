@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NOPE</title>
+  <title>NOPE - Jejak</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#000000" />
   
-  <!-- LOAD SUPABASE DULU -->
+  <!-- Load Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
@@ -17,6 +17,9 @@
       --accent-blue: #4903fc;
       --logo-red: #ff9999;
       --border-radius: 12px;
+      --gray-800: #1a1a1a;
+      --gray-600: #333333;
+      --gray-400: #666666;
     }
     
     * {
@@ -29,236 +32,501 @@
     body {
       background-color: var(--deep-black);
       color: var(--white);
-      padding: 24px;
       min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    /* Header Styles */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-top: 10px;
     }
     
     .logo {
       font-size: 28px;
       font-weight: 700;
       color: var(--logo-red);
-      margin-bottom: 24px;
-    }
-    
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
     }
     
     .greeting {
-      font-size: 20px;
+      font-size: 18px;
+      color: var(--white);
     }
     
+    /* Navigation Tabs */
     .nav-tabs {
       display: flex;
       gap: 16px;
-      margin-bottom: 24px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 30px;
+      border-bottom: 1px solid var(--gray-600);
+      padding-bottom: 8px;
     }
     
     .nav-tab {
       padding: 8px 16px;
       cursor: pointer;
-      font-size: 14px;
-      transition: color 0.2s ease;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--gray-400);
+      transition: all 0.2s ease;
+      border-bottom: 3px solid transparent;
     }
     
     .nav-tab.active {
       color: var(--accent-blue);
-      border-bottom: 2px solid var(--accent-blue);
+      border-bottom-color: var(--accent-blue);
     }
     
-    .artefak-card {
-      position: relative;
+    /* Main Artefak Section */
+    .main-artefak-container {
+      margin-bottom: 40px;
+    }
+    
+    .main-artefak-label {
+      font-size: 14px;
+      color: var(--gray-400);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .main-artefak {
       width: 100%;
-      aspect-ratio: 1/1;
-      overflow: hidden;
+      aspect-ratio: 1/1.428; /* Tinggi = 70% dari lebar (1/0.7 ≈ 1.428) */
+      position: relative;
       border-radius: var(--border-radius);
-      background: #111;
-      cursor: pointer;
-      transition: transform 0.2s ease;
+      overflow: hidden;
+      background: var(--gray-800);
+      border: 1px solid var(--gray-600);
     }
     
-    .artefak-card:hover,
-    .artefak-card:focus {
-      transform: scale(1.02);
-    }
-    
-    .artefak-card img {
+    .main-artefak-image {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
     
+    .main-artefak-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .placeholder-icon {
+      font-size: 48px;
+      color: var(--gray-600);
+      margin-bottom: 16px;
+    }
+    
+    .placeholder-text {
+      color: var(--gray-400);
+      font-size: 16px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    
+    /* Notasi Style */
     .notasi {
       position: absolute;
-      top: 8px;
+      top: 16px;
+      left: 16px;
+      background: rgba(0, 0, 0, 0.85);
+      color: var(--white);
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      max-width: calc(100% - 32px);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Upload Button */
+    .upload-btn {
+      background: var(--accent-blue);
+      color: var(--white);
+      border: none;
+      border-radius: 25px;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 180px;
+    }
+    
+    .upload-btn:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    
+    .upload-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .upload-btn.uploaded {
+      background: #10b981;
+    }
+    
+    /* Cooldown Timer */
+    .cooldown-info {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--gray-400);
+      text-align: center;
+    }
+    
+    .cooldown-timer {
+      color: var(--accent-blue);
+      font-weight: 600;
+    }
+    
+    /* Artefak History */
+    .history-section {
+      margin-top: 40px;
+    }
+    
+    .history-label {
+      font-size: 14px;
+      color: var(--gray-400);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    
+    .history-card {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--gray-800);
+      position: relative;
+      border: 1px solid var(--gray-600);
+    }
+    
+    .history-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .history-notasi {
+      position: absolute;
+      bottom: 8px;
       left: 8px;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      font-size: 12px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      max-width: 90%;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: var(--white);
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 12px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     
-    .upload-btn {
+    .history-placeholder {
       width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255,255,255,0.05);
-      border: 2px dashed rgba(255,255,255,0.3);
+      color: var(--gray-600);
+      font-size: 24px;
+    }
+    
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    
+    .modal-content {
+      background: var(--gray-800);
       border-radius: var(--border-radius);
-      color: rgba(255,255,255,0.6);
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.2s ease;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid var(--gray-600);
     }
     
-    .upload-btn:hover {
-      background: rgba(255,255,255,0.1);
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--gray-600);
     }
     
-    .artefak-tray {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--white);
+    }
+    
+    .modal-body {
+      padding: 20px;
+    }
+    
+    .modal-footer {
+      padding: 20px;
+      border-top: 1px solid var(--gray-600);
+      display: flex;
       gap: 12px;
-      margin-top: 16px;
+      justify-content: flex-end;
     }
     
-    .login-form, .main-view {
-      max-width: 500px;
-      margin: 0 auto;
-    }
-    
-    input[type="text"] {
-      width: 100%;
-      padding: 14px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: var(--border-radius);
-      color: white;
-      font-size: 16px;
-      margin-bottom: 16px;
-    }
-    
-    input[type="text"]::placeholder {
-      color: rgba(255,255,255,0.4);
-    }
-    
-    button {
-      width: 100%;
-      padding: 14px;
-      background: var(--accent-blue);
-      color: white;
+    .modal-btn {
+      padding: 10px 20px;
+      border-radius: 20px;
       border: none;
-      border-radius: var(--border-radius);
-      font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       transition: opacity 0.2s;
     }
     
-    button:hover {
-      opacity: 0.9;
+    .modal-btn.primary {
+      background: var(--accent-blue);
+      color: var(--white);
     }
     
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .modal-btn.secondary {
+      background: transparent;
+      color: var(--gray-400);
+      border: 1px solid var(--gray-600);
     }
     
-    .hidden {
-      display: none;
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 20px;
     }
     
-    .loading {
-      opacity: 0.7;
-      pointer-events: none;
-    }
-    
-    .error-message {
-      background: rgba(255, 0, 0, 0.1);
-      border: 1px solid rgba(255, 0, 0, 0.3);
-      padding: 12px;
-      border-radius: 8px;
-      margin: 16px 0;
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--gray-400);
       font-size: 14px;
     }
-  </style>
-</head>
-<body>
-  <div id="app">
-    <!-- Loading State -->
-    <div id="loading-view" style="
+    
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--gray-600);
+      border: 1px solid var(--gray-400);
+      border-radius: 8px;
+      color: var(--white);
+      font-size: 16px;
+    }
+    
+    .form-input::placeholder {
+      color: var(--gray-400);
+    }
+    
+    .file-input-label {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1/1.428;
+      background: var(--gray-600);
+      border: 2px dashed var(--gray-400);
+      border-radius: 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    
+    .file-input-label:hover {
+      border-color: var(--accent-blue);
+    }
+    
+    .file-input-icon {
+      font-size: 48px;
+      color: var(--gray-400);
+      margin-bottom: 16px;
+    }
+    
+    .file-input-text {
+      color: var(--gray-400);
+      font-size: 16px;
       text-align: center;
-    ">
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    .preview-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    
+    /* Utility Classes */
+    .hidden {
+      display: none;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    .mt-4 {
+      margin-top: 16px;
+    }
+    
+    .mb-4 {
+      margin-bottom: 16px;
+    }
+    
+    /* Tab Content */
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
       <div class="logo">NOPE</div>
-      <div style="margin-top: 20px; color: rgba(255,255,255,0.7);">
-        Memuat aplikasi...
+      <div class="greeting" id="greeting">Hello @user</div>
+    </div>
+    
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <div class="nav-tab active" data-tab="jejak">Jejak</div>
+      <div class="nav-tab" data-tab="jalan">Jalan</div>
+      <div class="nav-tab" data-tab="dunia">Dunia</div>
+      <div class="nav-tab" data-tab="jelajah">Jelajah</div>
+    </div>
+    
+    <!-- Jejak Tab Content -->
+    <div id="jejak-tab" class="tab-content active">
+      <!-- Main Artefak Section -->
+      <div class="main-artefak-container">
+        <div class="main-artefak-label">Artefak Bulan Ini</div>
+        <div class="main-artefak" id="main-artefak">
+          <!-- Artefak utama akan dimuat di sini -->
+        </div>
+        
+        <div class="text-center mt-4">
+          <button class="upload-btn" id="upload-main-btn">
+            Unggah Artefak Baru
+          </button>
+          <div class="cooldown-info" id="cooldown-info">
+            Dapat diunggah kembali dalam: <span class="cooldown-timer" id="cooldown-timer">30 hari</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Artefak History -->
+      <div class="history-section">
+        <div class="history-label">Riwayat Artefak</div>
+        <div class="history-grid" id="history-grid">
+          <!-- Riwayat artefak akan dimuat di sini -->
+        </div>
       </div>
     </div>
-
-    <!-- Login View -->
-    <div id="login-view" class="login-form hidden">
-      <div class="logo">NOPE</div>
-      <h1 style="margin-bottom: 24px;">Masuk dengan username</h1>
-      <input type="text" id="username-input" placeholder="Contoh: senja nope" maxlength="30" />
-      <button id="login-btn">Masuk</button>
-      <div id="login-error" class="error-message hidden"></div>
-      <p style="margin-top: 24px; color: rgba(255,255,255,0.5); font-size: 14px;">
-        Masukkan 2 kata untuk mulai menjelajah
-      </p>
+    
+    <!-- Other Tabs (Placeholder) -->
+    <div id="jalan-tab" class="tab-content">
+      <div style="text-align: center; padding: 60px 20px; color: var(--gray-400);">
+        🛣️ Halaman Jalan akan segera hadir
+      </div>
     </div>
-
-    <!-- Main View -->
-    <div id="main-view" class="main-view hidden">
-      <div class="logo">NOPE</div>
-      <div class="header">
-        <div class="greeting" id="greeting">Hello @user</div>
-        <div class="nav-tabs">
-          <div class="nav-tab active" data-tab="jejak">Jejak</div>
-          <div class="nav-tab" data-tab="jalan">Jalan</div>
-          <div class="nav-tab" data-tab="dunia">Dunia</div>
-          <div class="nav-tab" data-tab="jelajah">Jelajah</div>
+    
+    <div id="dunia-tab" class="tab-content">
+      <div style="text-align: center; padding: 60px 20px; color: var(--gray-400);">
+        🌍 Halaman Dunia akan segera hadir
+      </div>
+    </div>
+    
+    <div id="jelajah-tab" class="tab-content">
+      <div style="text-align: center; padding: 60px 20px; color: var(--gray-400);">
+        🔭 Halaman Jelajah akan segera hadir
+      </div>
+    </div>
+  </div>
+  
+  <!-- Upload Modal -->
+  <div id="upload-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Unggah Artefak Jejak</div>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <div class="form-label">Pilih Foto (Benda, bukan wajah)</div>
+          <label class="file-input-label" id="file-input-label">
+            <div class="file-input-icon">📷</div>
+            <div class="file-input-text">Tap untuk memilih foto</div>
+            <div class="file-input-text" style="font-size: 12px; margin-top: 8px;">
+              Ukuran optimal: tinggi 70% dari lebar
+            </div>
+            <input type="file" id="file-input" class="file-input" accept="image/*" capture="environment">
+          </label>
+          <div id="image-preview" class="hidden">
+            <img id="preview-image" class="preview-image" alt="Preview">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="notasi-input">
+            Notasi (maksimal 4 kata)
+            <span id="word-count" style="float: right; color: var(--gray-400);">0/4</span>
+          </label>
+          <input type="text" id="notasi-input" class="form-input" 
+                 placeholder="Contoh: Buku Harian Senja" maxlength="30">
+          <div style="font-size: 12px; color: var(--gray-400); margin-top: 4px;">
+            Notasi akan muncul di kiri atas foto
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <div style="font-size: 12px; color: var(--accent-blue); padding: 12px; background: rgba(73, 3, 252, 0.1); border-radius: 8px;">
+            ⏳ Artefak Jejak hanya dapat diubah setiap 30 hari sekali. Pilih foto yang berarti!
+          </div>
         </div>
       </div>
-
-      <div id="jejak-tab" class="tab-content">
-        <div class="artefak-tray" id="jejak-tray">
-          <!-- Artefak Jejak -->
-        </div>
-      </div>
-
-      <div id="jalan-tab" class="tab-content hidden">
-        <div class="artefak-tray" id="jalan-tray">
-          <!-- Artefak Jalan -->
-        </div>
-      </div>
-
-      <div id="dunia-tab" class="tab-content hidden">
-        <div class="artefak-tray" id="dunia-tray">
-          <!-- Artefak Dunia -->
-        </div>
-      </div>
-
-      <div id="jelajah-tab" class="tab-content hidden">
-        <div class="artefak-tray" id="jelajah-tray">
-          <!-- Artefak Jelajah -->
-        </div>
+      <div class="modal-footer">
+        <button class="modal-btn secondary" id="cancel-btn">Batal</button>
+        <button class="modal-btn primary" id="submit-btn" disabled>Unggah</button>
       </div>
     </div>
   </div>
@@ -271,126 +539,84 @@
     // ============ VARIABEL GLOBAL ============
     let supabaseClient = null;
     let currentUser = null;
+    let currentMainArtefak = null;
+    let artefakHistory = [];
+    let selectedFile = null;
     
     // ============ ELEMENTS ============
     const elements = {
-      loadingView: document.getElementById('loading-view'),
-      loginView: document.getElementById('login-view'),
-      mainView: document.getElementById('main-view'),
-      usernameInput: document.getElementById('username-input'),
-      loginBtn: document.getElementById('login-btn'),
-      loginError: document.getElementById('login-error'),
+      // Header
       greeting: document.getElementById('greeting'),
+      
+      // Navigation
       navTabs: document.querySelectorAll('.nav-tab'),
-      tabContents: document.querySelectorAll('.tab-content')
+      tabContents: document.querySelectorAll('.tab-content'),
+      
+      // Jejak Tab
+      mainArtefak: document.getElementById('main-artefak'),
+      uploadMainBtn: document.getElementById('upload-main-btn'),
+      cooldownInfo: document.getElementById('cooldown-info'),
+      cooldownTimer: document.getElementById('cooldown-timer'),
+      historyGrid: document.getElementById('history-grid'),
+      
+      // Upload Modal
+      uploadModal: document.getElementById('upload-modal'),
+      fileInputLabel: document.getElementById('file-input-label'),
+      fileInput: document.getElementById('file-input'),
+      imagePreview: document.getElementById('image-preview'),
+      previewImage: document.getElementById('preview-image'),
+      notasiInput: document.getElementById('notasi-input'),
+      wordCount: document.getElementById('word-count'),
+      cancelBtn: document.getElementById('cancel-btn'),
+      submitBtn: document.getElementById('submit-btn')
     };
     
     // ============ INITIALIZE ============
     async function initializeApp() {
-      console.log('🔄 Initializing NOPE app...');
+      console.log('🚀 Initializing NOPE Jejak...');
       
       try {
-        // 1. Cek apakah Supabase tersedia
+        // 1. Cek Supabase
         if (typeof supabase === 'undefined') {
           throw new Error('Supabase library not loaded!');
         }
         
         // 2. Inisialisasi Supabase Client
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-          auth: { persistSession: false }
-        });
-        
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         console.log('✅ Supabase initialized');
         
-        // 3. Setup event listeners
+        // 3. Setup Event Listeners
         setupEventListeners();
         
-        // 4. Cek session
-        await checkSession();
+        // 4. Cek Session (gunakan localStorage untuk demo)
+        const savedUser = localStorage.getItem('nope_user');
+        if (savedUser) {
+          currentUser = JSON.parse(savedUser);
+          elements.greeting.textContent = `Hello @${currentUser.username}`;
+          await loadJejakData();
+        } else {
+          // Auto login untuk demo (bisa diganti dengan form login)
+          currentUser = {
+            username: 'senja nope',
+            id: 'senja_nope'
+          };
+          localStorage.setItem('nope_user', JSON.stringify(currentUser));
+          elements.greeting.textContent = `Hello @${currentUser.username}`;
+          await loadJejakData();
+        }
         
-        // 5. Sembunyikan loading
-        elements.loadingView.style.display = 'none';
+        // 5. Update cooldown timer
+        updateCooldownTimer();
         
       } catch (error) {
         console.error('❌ Initialization error:', error);
-        showError('Gagal memuat aplikasi. Silakan refresh halaman.');
-      }
-    }
-    
-    // ============ SESSION MANAGEMENT ============
-    async function checkSession() {
-      const sessionUser = sessionStorage.getItem('nope_currentUser');
-      
-      if (sessionUser) {
-        try {
-          currentUser = JSON.parse(sessionUser);
-          console.log('✅ Session found:', currentUser);
-          
-          // Update UI
-          elements.greeting.textContent = `Hello @${currentUser.username}`;
-          showMainView();
-          await loadArtefaks('jejak');
-          
-        } catch (error) {
-          console.error('❌ Session error:', error);
-          sessionStorage.removeItem('nope_currentUser');
-          showLoginView();
-        }
-      } else {
-        console.log('ℹ️ No session found');
-        showLoginView();
-      }
-    }
-    
-    // ============ VIEW MANAGEMENT ============
-    function showLoading() {
-      elements.loadingView.style.display = 'flex';
-      elements.loginView.classList.add('hidden');
-      elements.mainView.classList.add('hidden');
-    }
-    
-    function showLoginView() {
-      elements.loadingView.style.display = 'none';
-      elements.loginView.classList.remove('hidden');
-      elements.mainView.classList.add('hidden');
-      
-      if (elements.usernameInput) {
-        elements.usernameInput.focus();
-      }
-    }
-    
-    function showMainView() {
-      elements.loadingView.style.display = 'none';
-      elements.loginView.classList.add('hidden');
-      elements.mainView.classList.remove('hidden');
-    }
-    
-    function showError(message, element = null) {
-      if (element) {
-        element.textContent = message;
-        element.classList.remove('hidden');
-      } else {
-        alert(message);
+        alert('Gagal memuat aplikasi. Silakan refresh halaman.');
       }
     }
     
     // ============ EVENT LISTENERS ============
     function setupEventListeners() {
-      // Login button
-      if (elements.loginBtn) {
-        elements.loginBtn.addEventListener('click', handleLogin);
-      }
-      
-      // Enter key on username input
-      if (elements.usernameInput) {
-        elements.usernameInput.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            handleLogin();
-          }
-        });
-      }
-      
-      // Navigation tabs
+      // Navigation Tabs
       elements.navTabs.forEach(tab => {
         tab.addEventListener('click', () => {
           // Update active tab
@@ -398,266 +624,350 @@
           tab.classList.add('active');
           
           // Show corresponding content
-          elements.tabContents.forEach(content => content.classList.add('hidden'));
-          document.getElementById(`${tab.dataset.tab}-tab`).classList.remove('hidden');
-          
-          // Load content
-          if (tab.dataset.tab === 'jelajah') {
-            loadJelajahTab();
-          } else {
-            loadArtefaks(tab.dataset.tab);
-          }
+          elements.tabContents.forEach(content => content.classList.remove('active'));
+          document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
         });
       });
+      
+      // Upload Button
+      elements.uploadMainBtn.addEventListener('click', () => {
+        if (elements.uploadMainBtn.classList.contains('uploaded')) {
+          alert('Anda sudah mengunggah artefak bulan ini. Tunggu 30 hari untuk mengubahnya.');
+          return;
+        }
+        showUploadModal();
+      });
+      
+      // File Input
+      elements.fileInput.addEventListener('change', handleFileSelect);
+      
+      // Notasi Input
+      elements.notasiInput.addEventListener('input', updateWordCount);
+      
+      // Modal Buttons
+      elements.cancelBtn.addEventListener('click', hideUploadModal);
+      elements.submitBtn.addEventListener('click', submitArtefak);
     }
     
-    // ============ LOGIN HANDLER ============
-    async function handleLogin() {
-      const username = elements.usernameInput.value.trim();
-      
-      // Validasi username
-      if (!username) {
-        showError('Username tidak boleh kosong', elements.loginError);
-        return;
-      }
-      
-      const words = username.split(' ');
-      if (words.length !== 2) {
-        showError('Username harus terdiri dari 2 kata (misal: "senja nope")', elements.loginError);
-        return;
-      }
-      
-      // Disable button selama proses
-      elements.loginBtn.disabled = true;
-      elements.loginBtn.textContent = 'Memuat...';
-      
+    // ============ JEJAK DATA MANAGEMENT ============
+    async function loadJejakData() {
       try {
-        // Simpan user di session
-        currentUser = {
-          username: username,
-          loginTime: new Date().toISOString(),
-          id: username.replace(/\s+/g, '_').toLowerCase()
-        };
+        // Load main artefak
+        const { data: mainData, error: mainError } = await supabaseClient
+          .from('artefaks')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .eq('category', 'jejak')
+          .eq('is_main', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
         
-        sessionStorage.setItem('nope_currentUser', JSON.stringify(currentUser));
+        if (!mainError && mainData) {
+          currentMainArtefak = mainData;
+          renderMainArtefak(mainData);
+          elements.uploadMainBtn.textContent = 'Artefak Terunggah';
+          elements.uploadMainBtn.classList.add('uploaded');
+          elements.uploadMainBtn.disabled = true;
+        } else {
+          renderMainArtefakPlaceholder();
+          elements.uploadMainBtn.textContent = 'Unggah Artefak Baru';
+          elements.uploadMainBtn.classList.remove('uploaded');
+          elements.uploadMainBtn.disabled = false;
+        }
         
-        // Update UI
-        elements.greeting.textContent = `Hello @${username}`;
-        showMainView();
+        // Load history
+        const { data: historyData, error: historyError } = await supabaseClient
+          .from('artefaks')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .eq('category', 'jejak')
+          .eq('is_main', false)
+          .order('created_at', { ascending: false })
+          .limit(9);
         
-        // Reset login form
-        elements.usernameInput.value = '';
-        elements.loginError.classList.add('hidden');
-        
-        // Load data pertama
-        await loadArtefaks('jejak');
-        
-        console.log('✅ Login successful:', currentUser);
+        if (!historyError && historyData) {
+          artefakHistory = historyData;
+          renderHistoryGrid(historyData);
+        } else {
+          renderHistoryGrid([]);
+        }
         
       } catch (error) {
-        console.error('❌ Login error:', error);
-        showError('Terjadi kesalahan saat login', elements.loginError);
-      } finally {
-        // Enable button kembali
-        elements.loginBtn.disabled = false;
-        elements.loginBtn.textContent = 'Masuk';
+        console.error('❌ Error loading jejak data:', error);
+        renderMainArtefakPlaceholder();
+        renderHistoryGrid([]);
       }
     }
     
-    // ============ LOGOUT HANDLER ============
-    function handleLogout() {
-      if (confirm('Yakin ingin logout?')) {
-        sessionStorage.removeItem('nope_currentUser');
-        currentUser = null;
-        
-        // Reset ke tab jejak
-        elements.navTabs.forEach(tab => tab.classList.remove('active'));
-        elements.navTabs[0].classList.add('active');
-        
-        elements.tabContents.forEach(content => content.classList.add('hidden'));
-        document.getElementById('jejak-tab').classList.remove('hidden');
-        
-        // Kembali ke login
-        showLoginView();
-      }
+    function renderMainArtefak(artefak) {
+      elements.mainArtefak.innerHTML = '';
+      
+      const img = document.createElement('img');
+      img.className = 'main-artefak-image';
+      img.src = artefak.image_url;
+      img.alt = artefak.notasi;
+      
+      const notasi = document.createElement('div');
+      notasi.className = 'notasi';
+      notasi.textContent = artefak.notasi;
+      
+      elements.mainArtefak.appendChild(img);
+      elements.mainArtefak.appendChild(notasi);
     }
     
-    // ============ LOAD ARTEFAKS ============
-    async function loadArtefaks(tabName) {
-      const trayId = `${tabName}-tray`;
-      const tray = document.getElementById(trayId);
-      
-      if (!tray) return;
-      
-      // Clear tray
-      tray.innerHTML = '';
-      
-      // Buat 6 kartu
-      for (let i = 0; i < 6; i++) {
-        const card = document.createElement('div');
-        card.className = 'artefak-card';
-        
-        if (i === 0) {
-          // Kartu pertama: Upload button
-          const uploadBtn = document.createElement('div');
-          uploadBtn.className = 'upload-btn';
-          uploadBtn.textContent = 'Unggah';
-          uploadBtn.addEventListener('click', () => handleUpload(tabName));
-          card.appendChild(uploadBtn);
-        } else {
-          // Kartu placeholder
-          const placeholder = document.createElement('div');
-          placeholder.style.cssText = `
-            width: 100%;
-            height: 100%;
-            background: #222;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #555;
-            font-size: 24px;
-          `;
-          placeholder.textContent = '—';
-          card.appendChild(placeholder);
-        }
-        
-        tray.appendChild(card);
-      }
-      
-      // Load data dari Supabase jika ada user
-      if (currentUser && supabaseClient) {
-        try {
-          const { data, error } = await supabaseClient
-            .from('artefaks')
-            .select('*')
-            .eq('category', tabName)
-            .eq('user_id', currentUser.username)
-            .order('created_at', { ascending: false })
-            .limit(5);
-          
-          if (error) throw error;
-          
-          if (data && data.length > 0) {
-            const cards = tray.querySelectorAll('.artefak-card');
-            
-            data.forEach((artefak, index) => {
-              if (index + 1 < cards.length) {
-                const card = cards[index + 1];
-                card.innerHTML = '';
-                
-                // Image
-                const img = document.createElement('img');
-                img.src = artefak.image_url || 'https://via.placeholder.com/300/222/222?text=Artefak';
-                img.alt = artefak.notasi || 'Artefak';
-                img.loading = 'lazy';
-                img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-                card.appendChild(img);
-                
-                // Notasi
-                if (artefak.notasi) {
-                  const notasiEl = document.createElement('div');
-                  notasiEl.className = 'notasi';
-                  notasiEl.textContent = artefak.notasi;
-                  card.appendChild(notasiEl);
-                }
-              }
-            });
-          }
-          
-        } catch (error) {
-          console.error(`❌ Error loading ${tabName}:`, error);
-        }
-      }
-    }
-    
-    // ============ JELAJAH TAB ============
-    async function loadJelajahTab() {
-      const tray = document.getElementById('jelajah-tray');
-      if (!tray || !currentUser) return;
-      
-      tray.innerHTML = '';
-      
-      // Kartu 1: Settings dengan logout
-      const settingsCard = document.createElement('div');
-      settingsCard.className = 'artefak-card';
-      settingsCard.innerHTML = `
-        <div style="padding: 16px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-          <div>
-            <h3 style="color: var(--accent-blue); margin-bottom: 12px;">Pengaturan</h3>
-            <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px;">
-              <strong>Username:</strong> ${currentUser.username}
-            </p>
-            <p style="font-size: 12px; color: rgba(255,255,255,0.5);">
-              Login: ${new Date(currentUser.loginTime).toLocaleTimeString('id-ID')}
-            </p>
+    function renderMainArtefakPlaceholder() {
+      elements.mainArtefak.innerHTML = `
+        <div class="main-artefak-placeholder">
+          <div class="placeholder-icon">📸</div>
+          <div class="placeholder-text">
+            Belum ada artefak Jejak.<br>
+            Unggah foto benda pertama Anda!
           </div>
-          <button id="logout-btn" style="
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 16px;
-          ">
-            Logout
-          </button>
         </div>
       `;
-      tray.appendChild(settingsCard);
-      
-      // Setup logout button
-      setTimeout(() => {
-        const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) {
-          logoutBtn.addEventListener('click', handleLogout);
-        }
-      }, 100);
-      
-      // Kartu 2-6: Fitur jelajah
-      const features = [
-        { title: 'Trending', desc: 'Artefak viral hari ini' },
-        { title: 'Discovery', desc: 'Temukan pengguna baru' },
-        { title: 'Peta Jejak', desc: 'Visualisasi perjalanan' },
-        { title: 'Statistik', desc: 'Aktivitas Anda' },
-        { title: 'Komunitas', desc: 'Grup dan diskusi' }
-      ];
-      
-      features.forEach(feature => {
-        const card = document.createElement('div');
-        card.className = 'artefak-card';
-        card.innerHTML = `
-          <div style="padding: 16px; height: 100%; display: flex; flex-direction: column; justify-content: center;">
-            <h3 style="color: var(--accent-blue); margin-bottom: 8px;">${feature.title}</h3>
-            <p style="font-size: 12px; color: rgba(255,255,255,0.5);">
-              ${feature.desc}
-            </p>
-          </div>
-        `;
-        tray.appendChild(card);
-      });
     }
     
-    // ============ UPLOAD HANDLER ============
-    async function handleUpload(category) {
+    function renderHistoryGrid(history) {
+      elements.historyGrid.innerHTML = '';
+      
+      // Buat 9 slot (3x3 grid)
+      for (let i = 0; i < 9; i++) {
+        const card = document.createElement('div');
+        card.className = 'history-card';
+        
+        if (i < history.length) {
+          const artefak = history[i];
+          card.innerHTML = `
+            <img src="${artefak.image_url}" alt="${artefak.notasi}">
+            <div class="history-notasi">${artefak.notasi}</div>
+          `;
+        } else {
+          card.innerHTML = `
+            <div class="history-placeholder">—</div>
+          `;
+        }
+        
+        elements.historyGrid.appendChild(card);
+      }
+    }
+    
+    // ============ UPLOAD MODAL ============
+    function showUploadModal() {
+      resetUploadForm();
+      elements.uploadModal.classList.remove('hidden');
+    }
+    
+    function hideUploadModal() {
+      elements.uploadModal.classList.add('hidden');
+    }
+    
+    function resetUploadForm() {
+      selectedFile = null;
+      elements.fileInput.value = '';
+      elements.imagePreview.classList.add('hidden');
+      elements.fileInputLabel.classList.remove('hidden');
+      elements.notasiInput.value = '';
+      updateWordCount();
+      elements.submitBtn.disabled = true;
+    }
+    
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // Validasi file
+      if (!file.type.startsWith('image/')) {
+        alert('Hanya file gambar yang diperbolehkan');
+        return;
+      }
+      
+      if (file.size > 10 * 1024 * 1024) { // 10MB max
+        alert('Ukuran file maksimal 10MB');
+        return;
+      }
+      
+      selectedFile = file;
+      
+      // Tampilkan preview
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        elements.previewImage.src = e.target.result;
+        elements.imagePreview.classList.remove('hidden');
+        elements.fileInputLabel.classList.add('hidden');
+        validateForm();
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    function updateWordCount() {
+      const text = elements.notasiInput.value.trim();
+      const wordCount = text === '' ? 0 : text.split(/\s+/).length;
+      elements.wordCount.textContent = `${wordCount}/4`;
+      
+      // Highlight jika lebih dari 4 kata
+      if (wordCount > 4) {
+        elements.wordCount.style.color = '#ef4444';
+      } else {
+        elements.wordCount.style.color = 'var(--gray-400)';
+      }
+      
+      validateForm();
+    }
+    
+    function validateForm() {
+      const hasFile = selectedFile !== null;
+      const notasi = elements.notasiInput.value.trim();
+      const wordCount = notasi === '' ? 0 : notasi.split(/\s+/).length;
+      const isValid = hasFile && notasi.length > 0 && wordCount <= 4 && wordCount > 0;
+      
+      elements.submitBtn.disabled = !isValid;
+      return isValid;
+    }
+    
+    // ============ SUBMIT ARTEFAK ============
+    async function submitArtefak() {
+      if (!validateForm()) {
+        alert('Harap lengkapi form dengan benar. Notasi maksimal 4 kata.');
+        return;
+      }
+      
       if (!currentUser) {
         alert('Silakan login terlebih dahulu');
         return;
       }
       
-      alert(`Fitur upload untuk ${category} akan segera aktif!\n\nUntuk testing, data akan disimulasikan.`);
+      try {
+        // Disable submit button
+        elements.submitBtn.disabled = true;
+        elements.submitBtn.textContent = 'Mengunggah...';
+        
+        // 1. Upload image to Supabase Storage
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${currentUser.id}_jejak_${Date.now()}.${fileExt}`;
+        const filePath = `jejak/${fileName}`;
+        
+        const { data: uploadData, error: uploadError } = await supabaseClient
+          .storage
+          .from('artefak')
+          .upload(filePath, selectedFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
+        
+        if (uploadError) throw uploadError;
+        
+        // 2. Get public URL
+        const { data: urlData } = supabaseClient
+          .storage
+          .from('artefak')
+          .getPublicUrl(filePath);
+        
+        // 3. Save to database
+        const now = new Date().toISOString();
+        const notasi = elements.notasiInput.value.trim();
+        
+        // Jika ada main artefak sebelumnya, nonaktifkan
+        if (currentMainArtefak) {
+          await supabaseClient
+            .from('artefaks')
+            .update({ is_main: false })
+            .eq('id', currentMainArtefak.id);
+        }
+        
+        // Insert artefak baru
+        const { data: insertData, error: insertError } = await supabaseClient
+          .from('artefaks')
+          .insert({
+            user_id: currentUser.id,
+            username: currentUser.username,
+            image_url: urlData.publicUrl,
+            notasi: notasi,
+            category: 'jejak',
+            is_main: true,
+            uploaded_at: now
+          })
+          .select()
+          .single();
+        
+        if (insertError) throw insertError;
+        
+        // 4. Update UI
+        currentMainArtefak = insertData;
+        renderMainArtefak(insertData);
+        elements.uploadMainBtn.textContent = 'Artefak Terunggah';
+        elements.uploadMainBtn.classList.add('uploaded');
+        elements.uploadMainBtn.disabled = true;
+        
+        // 5. Update history
+        await loadJejakData();
+        
+        // 6. Hide modal
+        hideUploadModal();
+        
+        // 7. Show success message
+        alert('✅ Artefak Jejak berhasil diunggah!');
+        
+        // 8. Set cooldown
+        setCooldown();
+        
+      } catch (error) {
+        console.error('❌ Upload error:', error);
+        alert('Gagal mengunggah artefak. Silakan coba lagi.');
+      } finally {
+        elements.submitBtn.disabled = false;
+        elements.submitBtn.textContent = 'Unggah';
+      }
+    }
+    
+    // ============ COOLDOWN MANAGEMENT ============
+    function setCooldown() {
+      const cooldownEnd = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 hari
+      localStorage.setItem('nope_cooldown_end', cooldownEnd);
+      updateCooldownTimer();
+    }
+    
+    function updateCooldownTimer() {
+      const cooldownEnd = localStorage.getItem('nope_cooldown_end');
       
-      // Simulasi upload (nanti bisa diimplementasi dengan Supabase Storage)
-      console.log(`Simulating upload to ${category} for user ${currentUser.username}`);
+      if (!cooldownEnd) {
+        elements.cooldownInfo.classList.add('hidden');
+        return;
+      }
+      
+      const now = Date.now();
+      const endTime = parseInt(cooldownEnd);
+      
+      if (now < endTime) {
+        const timeLeft = endTime - now;
+        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        
+        elements.cooldownTimer.textContent = `${days}h ${hours}j`;
+        elements.cooldownInfo.classList.remove('hidden');
+        
+        // Jika masih dalam cooldown, disable button
+        if (currentMainArtefak) {
+          elements.uploadMainBtn.disabled = true;
+          elements.uploadMainBtn.textContent = 'Artefak Terunggah';
+        }
+      } else {
+        // Cooldown selesai
+        localStorage.removeItem('nope_cooldown_end');
+        elements.cooldownInfo.classList.add('hidden');
+        
+        if (currentMainArtefak) {
+          elements.uploadMainBtn.disabled = false;
+          elements.uploadMainBtn.textContent = 'Perbarui Artefak';
+        }
+      }
     }
     
     // ============ START APP ============
-    // Tunggu DOM siap, lalu initialize
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initializeApp);
-    } else {
-      initializeApp();
-    }
+    document.addEventListener('DOMContentLoaded', initializeApp);
+    
+    // Update cooldown timer setiap menit
+    setInterval(updateCooldownTimer, 60000);
   </script>
 </body>
 </html>
