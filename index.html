@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NOPE - Jejak</title>
+  <title>NOPE</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#000000" />
   <style>
@@ -13,18 +13,17 @@
       --accent-blue: #4903fc;
       --logo-red: #ff9999;
       --border-radius: 12px;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: var(--font-family);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     body {
       background-color: var(--deep-black);
       color: var(--white);
-      padding: 20px;
+      padding: 24px;
       min-height: 100vh;
     }
     .logo {
@@ -33,119 +32,91 @@
       color: var(--logo-red);
       margin-bottom: 24px;
     }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
     .greeting {
       font-size: 20px;
-      margin-bottom: 24px;
     }
-
-    .artefak-main {
+    .nav-tabs {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .nav-tab {
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: color 0.2s ease;
+    }
+    .nav-tab.active {
+      color: var(--accent-blue);
+      border-bottom: 2px solid var(--accent-blue);
+    }
+    .artefak-card {
+      position: relative;
       width: 100%;
-      aspect-ratio: 1 / 0.7;
+      aspect-ratio: 1/1;
       overflow: hidden;
       border-radius: var(--border-radius);
-      margin-bottom: 24px;
-      position: relative;
       background: #111;
+      cursor: pointer;
+      transition: transform 0.2s ease;
     }
-    .artefak-main img {
+    .artefak-card:hover,
+    .artefak-card:focus {
+      transform: scale(1.02);
+    }
+    .artefak-card img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
-    .artefak-main .notasi {
+    .notasi {
       position: absolute;
-      bottom: 12px;
-      left: 12px;
+      top: 8px;
+      left: 8px;
       background: rgba(0,0,0,0.7);
       color: white;
-      font-size: 14px;
-      padding: 4px 8px;
+      font-size: 12px;
+      padding: 2px 6px;
       border-radius: 4px;
       max-width: 90%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .upload-main {
+    .upload-btn {
+      width: 100%;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100%;
-      color: rgba(255,255,255,0.5);
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    .rantbox {
-      position: relative;
-      width: 100%;
       background: rgba(255,255,255,0.05);
+      border: 2px dashed rgba(255,255,255,0.3);
       border-radius: var(--border-radius);
-      padding: 16px;
-      margin-bottom: 24px;
-    }
-    .rantbox textarea {
-      width: 100%;
-      height: 5em;
-      background: transparent;
-      border: none;
-      color: var(--white);
-      font-size: 16px;
-      resize: none;
-      outline: none;
-    }
-    .rantbox textarea::placeholder {
-      color: rgba(255,255,255,0.5);
-    }
-    .rantbox .cta {
-      position: absolute;
-      bottom: 12px;
-      right: 12px;
-      background: var(--accent-blue);
-      color: white;
-      border: none;
-      padding: 4px 12px;
-      border-radius: 6px;
+      color: rgba(255,255,255,0.6);
       font-size: 14px;
       cursor: pointer;
+      transition: background 0.2s ease;
     }
-
-    .jurnal-rant { margin-bottom: 24px; }
-    .rant-item { margin-bottom: 16px; position: relative; }
-    .rant-timestamp { position: absolute; top: -20px; left: 0; font-size: 12px; color: rgba(255,255,255,0.4); }
-    .rant-text {
-      background: rgba(255,255,255,0.03);
-      padding: 12px;
-      border-radius: var(--border-radius);
-      font-size: 15px;
-      line-height: 1.5;
+    .upload-btn:hover {
+      background: rgba(255,255,255,0.1);
     }
-
     .artefak-tray {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
-      margin-bottom: 32px;
-    }
-    .artefak-card {
-      aspect-ratio: 1/1;
-      overflow: hidden;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .artefak-card:hover { transform: scale(1.03); }
-    .artefak-card img { width: 100%; height: 100%; object-fit: cover; }
-
-    .tagline {
-      text-align: center;
-      font-size: 16px;
-      line-height: 1.5;
-      color: rgba(255,255,255,0.8);
       margin-top: 16px;
     }
-
-    .login-form {
+    .login-form, .main-view {
       max-width: 500px;
-      margin: 50px auto;
+      margin: 0 auto;
     }
     input[type="text"] {
       width: 100%;
@@ -156,6 +127,9 @@
       color: white;
       font-size: 16px;
       margin-bottom: 16px;
+    }
+    input[type="text"]::placeholder {
+      color: rgba(255,255,255,0.4);
     }
     button {
       width: 100%;
@@ -168,47 +142,55 @@
       font-weight: 600;
       cursor: pointer;
     }
-    .hidden { display: none; }
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <div id="login-view" class="login-form">
-    <div class="logo">NOPE</div>
-    <h1>Masuk dengan username</h1>
-    <input type="text" id="username-input" placeholder="Contoh: senja nope" maxlength="30" />
-    <button id="login-btn">Masuk</button>
-  </div>
-
-  <div id="main-view" class="hidden">
-    <div class="logo">NOPE</div>
-    <div class="greeting" id="greeting">Hello @user</div>
-
-    <!-- Artefak Utama -->
-    <div id="artefak-main" class="artefak-main">
-      <div class="upload-main" id="upload-main-btn">+ Unggah Artefak (1x/30 hari)</div>
+  <div id="app">
+    <div id="login-view" class="login-form">
+      <div class="logo">NOPE</div>
+      <h1>Masuk dengan username</h1>
+      <input type="text" id="username-input" placeholder="Contoh: senja nope" maxlength="30" />
+      <button id="login-btn">Masuk</button>
     </div>
 
-    <!-- Rantbox -->
-    <div class="rantbox">
-      <textarea id="rant-input" placeholder="Jejakmu dalam 300 huruf..."></textarea>
-      <button class="cta" id="jejakkan-btn">Jejakkan</button>
-    </div>
+    <div id="main-view" class="main-view hidden">
+      <div class="logo">NOPE</div>
+      <div class="header">
+        <div class="greeting" id="greeting">Hello @user</div>
+        <div class="nav-tabs">
+          <div class="nav-tab active" data-tab="jejak">Jejak</div>
+          <div class="nav-tab" data-tab="jalan">Jalan</div>
+          <div class="nav-tab" data-tab="dunia">Dunia</div>
+          <div class="nav-tab" data-tab="jelajah">Jelajah</div>
+        </div>
+      </div>
 
-    <!-- Jurnal Rant -->
-    <div class="jurnal-rant" id="jurnal-container">
-      <!-- Akan diisi oleh JS -->
-    </div>
+      <div id="jejak-tab" class="tab-content">
+        <div class="artefak-tray" id="jejak-tray">
+          <!-- 6 artefak Jejak -->
+        </div>
+      </div>
 
-    <!-- Tray Artefak -->
-    <div class="artefak-tray" id="artefak-tray">
-      <!-- Akan diisi oleh JS -->
-    </div>
+      <div id="jalan-tab" class="tab-content hidden">
+        <div class="artefak-tray" id="jalan-tray">
+          <!-- 6 artefak Jalan -->
+        </div>
+      </div>
 
-    <!-- Tagline -->
-    <div class="tagline">
-      untuk setiap jiwa<br>
-      yang memilih kejujuran<br>
-      tanpa meminta pengakuan
+      <div id="dunia-tab" class="tab-content hidden">
+        <div class="artefak-tray" id="dunia-tray">
+          <!-- 6 artefak Dunia -->
+        </div>
+      </div>
+
+      <div id="jelajah-tab" class="tab-content hidden">
+        <div class="artefak-tray" id="jelajah-tray">
+          <!-- 6 artefak Jelajah -->
+        </div>
+      </div>
     </div>
   </div>
 
@@ -220,39 +202,22 @@
     const SUPABASE_URL = 'https://nmgquhrqfdbhhmcntrwx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tcWN1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUwNTQzMzMsImV4cCI6MjA1MDYzMDMzM30.eL7W8b4K7rN7vT8tDf9P3e3o1gXz3V3m';
 
-    // Inisialisasi
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Inisialisasi Supabase hanya sekali
+    if (typeof window.supabase === 'undefined') {
+      const { createClient } = supabase;
+      window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
     let currentUser = null;
 
-    // DOM
     const loginView = document.getElementById('login-view');
     const mainView = document.getElementById('main-view');
     const usernameInput = document.getElementById('username-input');
     const loginBtn = document.getElementById('login-btn');
     const greetingEl = document.getElementById('greeting');
-    const rantInput = document.getElementById('rant-input');
-    const jejakkanBtn = document.getElementById('jejakkan-btn');
-    const uploadMainBtn = document.getElementById('upload-main-btn');
-    const jurnalContainer = document.getElementById('jurnal-container');
-    const artefakTray = document.getElementById('artefak-tray');
-    const artefakMain = document.getElementById('artefak-main');
+    const navTabs = document.querySelectorAll('.nav-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
 
-    // Login
-    loginBtn.addEventListener('click', () => {
-      const username = usernameInput.value.trim();
-      if (!username || username.split(' ').length !== 2) {
-        alert('Username harus 2 kata!');
-        return;
-      }
-      currentUser = { username };
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-      greetingEl.textContent = `Hello @${username}`;
-      loginView.classList.add('hidden');
-      mainView.classList.remove('hidden');
-      loadAllData();
-    });
-
-    // Load saat halaman dibuka
     document.addEventListener('DOMContentLoaded', () => {
       const saved = localStorage.getItem('currentUser');
       if (saved) {
@@ -260,41 +225,94 @@
         greetingEl.textContent = `Hello @${currentUser.username}`;
         loginView.classList.add('hidden');
         mainView.classList.remove('hidden');
-        loadAllData();
+        loadArtefaks('jejak');
       }
     });
 
-    async function loadAllData() {
-      loadMainArtefak();
-      loadRants();
-      loadArtefaks();
-    }
+    loginBtn.addEventListener('click', () => {
+      const username = usernameInput.value.trim();
+      if (!username || username.split(' ').length !== 2) {
+        alert('Username harus terdiri dari 2 kata, misal: "senja nope"');
+        return;
+      }
+      currentUser = { username };
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      greetingEl.textContent = `Hello @${username}`;
+      loginView.classList.add('hidden');
+      mainView.classList.remove('hidden');
+      loadArtefaks('jejak');
+    });
 
-    // === MAIN ARTEFAK (1x per 30 hari) ===
-    async function loadMainArtefak() {
-      const { data, error } = await supabase
+    // Tab Navigation
+    navTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        navTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        tabContents.forEach(content => content.classList.add('hidden'));
+        document.getElementById(`${tab.dataset.tab}-tab`).classList.remove('hidden');
+        loadArtefaks(tab.dataset.tab);
+      });
+    });
+
+    async function loadArtefaks(tabName) {
+      const trayId = `${tabName}-tray`;
+      const tray = document.getElementById(trayId);
+      tray.innerHTML = '';
+
+      for (let i = 0; i < 6; i++) {
+        const card = document.createElement('div');
+        card.className = 'artefak-card';
+        if (i === 0) {
+          const btn = document.createElement('div');
+          btn.className = 'upload-btn';
+          btn.textContent = 'Unggah';
+          btn.addEventListener('click', () => uploadArtefak(tabName));
+          card.appendChild(btn);
+        } else {
+          const placeholder = document.createElement('div');
+          placeholder.style.backgroundColor = '#222';
+          placeholder.style.display = 'flex';
+          placeholder.style.alignItems = 'center';
+          placeholder.style.justifyContent = 'center';
+          placeholder.style.color = '#555';
+          placeholder.style.height = '100%';
+          placeholder.textContent = '—';
+          card.appendChild(placeholder);
+        }
+        tray.appendChild(card);
+      }
+
+      // ✅ Gunakan window.supabase.from
+      const { data, error } = await window.supabase
         .from('artefaks')
         .select('*')
-        .eq('user_id', currentUser.username)
+        .eq('category', tabName) // Tambahkan kolom category di tabel artefaks
         .order('created_at', { ascending: false })
-        .limit(1);
+        .limit(5);
 
-      if (error) console.error(error);
-      else if (data && data[0]) {
-        const artefak = data[0];
-        artefakMain.innerHTML = `
-          <img src="${artefak.image_url}" alt="Artefak" />
-          <div class="notasi">${artefak.notasi || ''}</div>
-        `;
-      } else {
-        uploadMainBtn.innerHTML = '+ Unggah Artefak (1x/30 hari)';
-        artefakMain.innerHTML = '';
-        artefakMain.appendChild(uploadMainBtn);
-        uploadMainBtn.onclick = () => uploadMainArtefak();
+      if (!error && data && data.length > 0) {
+        const cards = tray.querySelectorAll('.artefak-card');
+        data.forEach((artefak, idx) => {
+          if (idx + 1 < cards.length) {
+            const card = cards[idx + 1];
+            card.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = artefak.image_url;
+            img.alt = 'Artefak';
+            img.loading = 'lazy';
+            card.appendChild(img);
+            if (artefak.notasi) {
+              const notasi = document.createElement('div');
+              notasi.className = 'notasi';
+              notasi.textContent = artefak.notasi;
+              card.appendChild(notasi);
+            }
+          }
+        });
       }
     }
 
-    async function uploadMainArtefak() {
+    async function uploadArtefak(category) {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
@@ -302,103 +320,44 @@
         const file = e.target.files[0];
         if (!file) return;
 
-        const filePath = `public/${currentUser.username.replace(/\s+/g, '_')}/main-${Date.now()}.jpg`;
-        const { data, error } = await supabase.storage
+        const filePath = `public/${currentUser.username.replace(/\s+/g, '_')}/${Date.now()}.jpg`;
+        const { data, error } = await window.supabase.storage
           .from('artefak')
           .upload(filePath, file, { contentType: 'image/jpeg', upsert: false });
 
         if (error) {
-          alert('Gagal upload artefak.');
+          alert('Gagal upload. Coba lagi!');
+          console.error(error);
           return;
         }
 
-        const {  publicUrlData } = supabase.storage
+        const {  publicUrlData } = window.supabase.storage
           .from('artefak')
           .getPublicUrl(data.path);
         const publicUrl = publicUrlData.publicUrl;
 
-        const notasi = prompt('Notasi (maks 4 kata):', 'Senja abadi');
+        const notasi = prompt('Masukkan notasi (maks 4 kata):', 'Senja abadi');
         if (!notasi) return;
 
-        const { error: insertError } = await supabase
+        // ✅ Gunakan window.supabase.from + tambahkan category
+        const { error: insertError } = await window.supabase
           .from('artefaks')
-          .insert({ user_id: currentUser.username, image_url: publicUrl, notasi });
+          .insert({
+            user_id: currentUser.username,
+            image_url: publicUrl,
+            notasi: notasi,
+            note: '',
+            category: category // Kolom baru untuk membedakan Jejak/Jalan/Dunia/Jelajah
+          });
 
-        if (insertError) alert('Gagal simpan artefak.');
-        else loadMainArtefak();
+        if (insertError) {
+          alert('Gagal simpan metadata.');
+          console.error(insertError);
+        } else {
+          loadArtefaks(category);
+        }
       };
       input.click();
-    }
-
-    // === RANTS ===
-    jejakkanBtn.addEventListener('click', async () => {
-      const content = rantInput.value.trim();
-      if (!content) return;
-      if (content.length > 300) {
-        alert('Maksimal 300 huruf!');
-        return;
-      }
-
-      const { error } = await supabase
-        .from('rants')
-        .insert({ user_id: currentUser.username, content });
-
-      if (error) alert('Gagal menyimpan rant.');
-      else {
-        rantInput.value = '';
-        loadRants();
-      }
-    });
-
-    async function loadRants() {
-      const { data, error } = await supabase
-        .from('rants')
-        .select('*')
-        .eq('user_id', currentUser.username)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      jurnalContainer.innerHTML = '';
-      if (error) console.error(error);
-      else {
-        data.forEach(rant => {
-          const date = new Date(rant.created_at);
-          const formatted = date.toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: '2-digit'
-          }).replace(/ /g, '-').toLowerCase();
-
-          const div = document.createElement('div');
-          div.className = 'rant-item';
-          div.innerHTML = `
-            <div class="rant-timestamp">${formatted}</div>
-            <div class="rant-text">${rant.content}</div>
-          `;
-          jurnalContainer.appendChild(div);
-        });
-      }
-    }
-
-    // === TRAY ARTEFAK (6 terakhir) ===
-    async function loadArtefaks() {
-      const { data, error } = await supabase
-        .from('artefaks')
-        .select('*')
-        .eq('user_id', currentUser.username)
-        .order('created_at', { ascending: false })
-        .limit(6);
-
-      artefakTray.innerHTML = '';
-      if (error) console.error(error);
-      else {
-        data.forEach(artefak => {
-          const card = document.createElement('div');
-          card.className = 'artefak-card';
-          card.innerHTML = `<img src="${artefak.image_url}" alt="Artefak" />`;
-          artefakTray.appendChild(card);
-        });
-      }
     }
   </script>
 </body>
