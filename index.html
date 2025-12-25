@@ -36,11 +36,12 @@
       overflow-x: hidden;
     }
     
+    /* Container dinamis sesuai lebar handphone */
     .container {
       width: 100%;
+      max-width: 428px; /* Maksimal lebar handphone modern */
       margin: 0 auto;
       padding: 20px;
-      max-width: 500px;
     }
     
     /* Header Styles */
@@ -90,7 +91,7 @@
       border-bottom-color: var(--accent-blue);
     }
     
-    /* Main Artefak Section - TINGGI 70% DARI LEBAR LAYAR */
+    /* Main Artefak Section - TINGGI 70% DARI LEBAR DINAMIS */
     .main-artefak-container {
       margin-bottom: 40px;
       width: 100%;
@@ -110,32 +111,30 @@
     }
     
     .main-artefak {
-      width: 100vw; /* Ambil lebar penuh viewport */
-      margin-left: -20px; /* Offset padding container */
-      margin-right: -20px;
+      width: 100%; /* Mengikuti lebar container dinamis */
       position: relative;
       overflow: hidden;
+      border-radius: var(--border-radius);
+      background: var(--gray-800);
+      border: 1px solid var(--gray-600);
     }
     
-    /* TINGGI DIKALKULASI DI JS: tinggi = 70% dari lebar layar */
+    /* TINGGI DIKALKULASI DI JS: tinggi = 70% dari lebar artefak */
     .main-artefak-image {
       width: 100%;
       display: block;
       object-fit: cover;
+      border-radius: var(--border-radius);
     }
     
     .main-artefak-placeholder {
-      width: 100vw;
-      margin-left: -20px;
-      margin-right: -20px;
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      background: var(--gray-800);
-      border-top: 1px solid var(--gray-600);
-      border-bottom: 1px solid var(--gray-600);
+      border-radius: var(--border-radius);
     }
     
     .placeholder-icon {
@@ -160,18 +159,19 @@
       right: 0;
       bottom: 0;
       pointer-events: none;
+      border-radius: var(--border-radius);
     }
     
     .notasi {
       position: absolute;
-      top: 20px;
-      left: 20px;
+      top: 16px;
+      left: 16px;
       background: rgba(0, 0, 0, 0.85);
       color: var(--white);
-      font-size: 16px;
-      padding: 10px 20px;
+      font-size: 15px;
+      padding: 10px 18px;
       border-radius: 25px;
-      max-width: calc(100% - 40px);
+      max-width: calc(100% - 32px);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -184,7 +184,7 @@
     
     /* Upload Button */
     .upload-section {
-      padding: 20px;
+      padding: 20px 0;
       text-align: center;
     }
     
@@ -430,18 +430,21 @@
       display: none;
     }
     
-    /* Preview dengan tinggi 70% dari lebar */
+    /* Preview container */
     .preview-container {
       width: 100%;
       position: relative;
       margin-bottom: 20px;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      background: var(--gray-600);
+      border: 1px solid var(--gray-400);
     }
     
     .preview-image {
       width: 100%;
       display: block;
       object-fit: cover;
-      border-radius: 8px;
     }
     
     .preview-notasi {
@@ -486,30 +489,12 @@
     }
     
     /* Responsive adjustments */
-    @media (max-width: 768px) {
+    @media (max-width: 480px) {
       .container {
         padding: 15px;
+        max-width: 100%;
       }
       
-      .main-artefak {
-        margin-left: -15px;
-        margin-right: -15px;
-      }
-      
-      .main-artefak-placeholder {
-        margin-left: -15px;
-        margin-right: -15px;
-      }
-      
-      .notasi {
-        top: 15px;
-        left: 15px;
-        font-size: 14px;
-        padding: 8px 16px;
-      }
-    }
-    
-    @media (max-width: 480px) {
       .nav-tabs {
         gap: 8px;
       }
@@ -521,6 +506,18 @@
       
       .history-grid {
         gap: 8px;
+      }
+      
+      .notasi {
+        font-size: 14px;
+        padding: 8px 16px;
+      }
+    }
+    
+    /* Untuk tablet dan desktop kecil */
+    @media (min-width: 768px) {
+      .container {
+        max-width: 428px; /* Tetap seperti handphone */
       }
     }
   </style>
@@ -605,7 +602,7 @@
               <div class="file-input-icon">📷</div>
               <div class="file-input-text">Tap untuk memilih foto</div>
               <div class="file-input-text" style="font-size: 12px; margin-top: 8px;">
-                Foto akan ditampilkan dengan tinggi 70% dari lebar layar
+                Foto akan ditampilkan dengan tinggi 70% dari lebar
               </div>
               <input type="file" id="file-input" class="file-input" accept="image/*" capture="environment">
             </label>
@@ -651,7 +648,6 @@
     let currentMainArtefak = null;
     let artefakHistory = [];
     let selectedFile = null;
-    let screenWidth = window.innerWidth;
     
     // ============ ELEMENTS ============
     const elements = {
@@ -682,15 +678,25 @@
     
     // ============ FUNGSI UTILITAS ============
     
-    // Hitung tinggi berdasarkan 70% dari lebar layar
+    // Hitung tinggi berdasarkan 70% dari lebar artefak (bukan viewport)
     function calculateArtefakHeight() {
-      screenWidth = window.innerWidth;
-      return Math.floor(screenWidth * 0.7);
+      // Dapatkan lebar container artefak
+      const artefakWidth = elements.mainArtefak.offsetWidth;
+      
+      // Jika belum ada width (masih loading), gunakan container width
+      if (!artefakWidth || artefakWidth === 0) {
+        const container = document.querySelector('.container');
+        return Math.floor((container.offsetWidth - 40) * 0.7); // 40px = padding
+      }
+      
+      return Math.floor(artefakWidth * 0.7);
     }
     
     // Set tinggi elemen artefak
     function setArtefakHeight(element, height) {
-      element.style.height = `${height}px`;
+      if (element) {
+        element.style.height = `${height}px`;
+      }
     }
     
     // Format tanggal
@@ -725,7 +731,11 @@
         if (savedUser) {
           currentUser = JSON.parse(savedUser);
           elements.greeting.textContent = `Hello @${currentUser.username}`;
-          await loadJejakData();
+          // Tunggu DOM siap dulu
+          setTimeout(async () => {
+            await loadJejakData();
+            updateArtefakHeight();
+          }, 100);
         } else {
           // Auto login untuk demo
           currentUser = {
@@ -734,14 +744,14 @@
           };
           localStorage.setItem('nope_user', JSON.stringify(currentUser));
           elements.greeting.textContent = `Hello @${currentUser.username}`;
-          await loadJejakData();
+          setTimeout(async () => {
+            await loadJejakData();
+            updateArtefakHeight();
+          }, 100);
         }
         
         // 5. Update cooldown timer
         updateCooldownTimer();
-        
-        // 6. Set initial height untuk placeholder
-        updateArtefakHeight();
         
       } catch (error) {
         console.error('❌ Initialization error:', error);
@@ -752,8 +762,9 @@
     // Update tinggi artefak saat resize
     function updateArtefakHeight() {
       const height = calculateArtefakHeight();
+      console.log('📏 Artefak height:', height, 'px');
       
-      // Update main artefak jika ada
+      // Update main artefak image jika ada
       const mainImage = elements.mainArtefak.querySelector('.main-artefak-image');
       if (mainImage) {
         setArtefakHeight(mainImage, height);
@@ -805,6 +816,23 @@
         updateArtefakHeight();
         updatePreviewHeight();
       }, 250));
+      
+      // Observer untuk perubahan ukuran container
+      if (typeof ResizeObserver !== 'undefined') {
+        const resizeObserver = new ResizeObserver(() => {
+          updateArtefakHeight();
+          updatePreviewHeight();
+        });
+        
+        // Observe container
+        const container = document.querySelector('.container');
+        if (container) {
+          resizeObserver.observe(container);
+        }
+        
+        // Observe main artefak
+        resizeObserver.observe(elements.mainArtefak);
+      }
     }
     
     // Debounce function untuk resize
@@ -878,11 +906,15 @@
         <img class="main-artefak-image" 
              src="${artefak.image_url}" 
              alt="${artefak.notasi}"
-             style="height: ${height}px;">
+             style="height: ${height}px;"
+             onload="updateArtefakHeight()">
         <div class="notasi-overlay">
           <div class="notasi">${artefak.notasi}</div>
         </div>
       `;
+      
+      // Update height setelah gambar load
+      setTimeout(updateArtefakHeight, 100);
     }
     
     function renderMainArtefakPlaceholder() {
@@ -970,15 +1002,18 @@
     }
     
     function renderImagePreview(imageData) {
-      const height = calculateArtefakHeight();
+      // Hitung lebar preview (sama dengan modal content)
+      const previewWidth = Math.min(400, window.innerWidth - 40);
+      const previewHeight = Math.floor(previewWidth * 0.7);
+      
       const notasi = elements.notasiInput.value.trim();
       
       elements.imagePreview.innerHTML = `
-        <div style="position: relative;">
+        <div style="position: relative; width: 100%;">
           <img class="preview-image" 
                src="${imageData}" 
                alt="Preview"
-               style="height: ${height}px;">
+               style="height: ${previewHeight}px;">
           ${notasi ? `<div class="preview-notasi">${notasi}</div>` : ''}
         </div>
       `;
@@ -992,8 +1027,9 @@
       
       const previewImg = elements.imagePreview.querySelector('.preview-image');
       if (previewImg) {
-        const height = calculateArtefakHeight();
-        previewImg.style.height = `${height}px`;
+        const previewWidth = Math.min(400, window.innerWidth - 40);
+        const previewHeight = Math.floor(previewWidth * 0.7);
+        previewImg.style.height = `${previewHeight}px`;
       }
     }
     
