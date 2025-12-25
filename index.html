@@ -142,6 +142,14 @@
       position: relative;
     }
 
+    /* --- TAMBAHAN UNTUK TIMESTAMP DI RANT --- */
+    .rant-timestamp {
+      color: #555; /* Warna samar */
+      font-size: 0.75rem;
+      margin-bottom: 4px;
+      text-align: right;
+    }
+
     .artefak-tray {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -171,11 +179,12 @@
       filter: brightness(0.9);
     }
 
+    /* --- PERBAIKAN JARAK TAGLINE --- */
     .tagline-gen-z {
       color: #aaa;
       font-style: italic;
       text-align: center;
-      margin-top: 24px;
+      margin-top: 12px; /* Dikurangi dari 24px menjadi 12px */
       font-size: 0.9rem;
     }
 
@@ -517,7 +526,7 @@
         const newRant = {
           id: 'rant_' + Date.now(),
           text,
-          time: Date.now(),
+          time: Date.now(), // Simpan waktu saat unggah
           emojis: { '😭': 0, '🔥': 0, '🤡': 0 }
         };
 
@@ -648,6 +657,15 @@
       { url: "https://images.unsplash.com/photo-1506260408123-9e6e537a2e05?auto=format&fit=crop&w=100", note: "Senyum sendirian", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } }
     ];
 
+    // --- FUNGSI BARU: Format Tanggal dd-mmm-yy ---
+    function formatDate(timestamp) {
+      const date = new Date(timestamp);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = date.toLocaleString('id-ID', { month: 'short' }); // Jan, Feb, Mar, dll
+      const year = String(date.getFullYear()).slice(-2); // Ambil 2 digit terakhir tahun
+      return `${day}-${month}-${year}`;
+    }
+
     function renderFeed() {
       const rants = JSON.parse(localStorage.getItem('nopeUserRants') || '[]');
       const allRants = [...rants];
@@ -666,6 +684,8 @@
       const feed = document.getElementById('feed-container');
       feed.innerHTML = allRants.slice(0, 10).map(rant => `
         <div class="rant-item">
+          <!-- TAMBAHKAN TIMESTAMP DI SINI -->
+          <div class="rant-timestamp">${formatDate(rant.time)}</div>
           ${escapeHtml(rant.text)}
           <span class="emoji-pulse">😭</span>
         </div>
