@@ -33,12 +33,14 @@
       background-color: var(--deep-black);
       color: var(--white);
       min-height: 100vh;
+      overflow-x: hidden;
     }
     
     .container {
-      max-width: 500px;
+      width: 100%;
       margin: 0 auto;
       padding: 20px;
+      max-width: 500px;
     }
     
     /* Header Styles */
@@ -68,6 +70,8 @@
       margin-bottom: 30px;
       border-bottom: 1px solid var(--gray-600);
       padding-bottom: 8px;
+      overflow-x: auto;
+      white-space: nowrap;
     }
     
     .nav-tab {
@@ -78,6 +82,7 @@
       color: var(--gray-400);
       transition: all 0.2s ease;
       border-bottom: 3px solid transparent;
+      flex-shrink: 0;
     }
     
     .nav-tab.active {
@@ -85,9 +90,10 @@
       border-bottom-color: var(--accent-blue);
     }
     
-    /* Main Artefak Section */
+    /* Main Artefak Section - TINGGI 70% DARI LEBAR LAYAR */
     .main-artefak-container {
       margin-bottom: 40px;
+      width: 100%;
     }
     
     .main-artefak-label {
@@ -98,32 +104,38 @@
       letter-spacing: 1px;
     }
     
-    .main-artefak {
+    .main-artefak-wrapper {
       width: 100%;
-      aspect-ratio: 1/1.428; /* Tinggi = 0.04 dari lebar (1/0.7 ≈ 1.428) */
       position: relative;
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      background: var(--gray-800);
-      border: 1px solid var(--gray-600);
     }
     
+    .main-artefak {
+      width: 100vw; /* Ambil lebar penuh viewport */
+      margin-left: -20px; /* Offset padding container */
+      margin-right: -20px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* TINGGI DIKALKULASI DI JS: tinggi = 70% dari lebar layar */
     .main-artefak-image {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
       display: block;
+      object-fit: cover;
     }
     
     .main-artefak-placeholder {
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      margin-left: -20px;
+      margin-right: -20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 30px;
       text-align: center;
+      background: var(--gray-800);
+      border-top: 1px solid var(--gray-600);
+      border-bottom: 1px solid var(--gray-600);
     }
     
     .placeholder-icon {
@@ -137,19 +149,29 @@
       font-size: 16px;
       margin-bottom: 20px;
       line-height: 1.5;
+      padding: 0 20px;
     }
     
-    /* Notasi Style */
+    /* Notasi Style - di atas gambar */
+    .notasi-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+    
     .notasi {
       position: absolute;
-      top: 16px;
-      left: 16px;
+      top: 20px;
+      left: 20px;
       background: rgba(0, 0, 0, 0.85);
       color: var(--white);
-      font-size: 14px;
-      padding: 8px 16px;
-      border-radius: 20px;
-      max-width: calc(100% - 32px);
+      font-size: 16px;
+      padding: 10px 20px;
+      border-radius: 25px;
+      max-width: calc(100% - 40px);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -157,9 +179,15 @@
       letter-spacing: 0.5px;
       backdrop-filter: blur(4px);
       border: 1px solid rgba(255, 255, 255, 0.1);
+      pointer-events: auto;
     }
     
     /* Upload Button */
+    .upload-section {
+      padding: 20px;
+      text-align: center;
+    }
+    
     .upload-btn {
       background: var(--accent-blue);
       color: var(--white);
@@ -171,6 +199,7 @@
       cursor: pointer;
       transition: all 0.2s ease;
       min-width: 180px;
+      display: inline-block;
     }
     
     .upload-btn:hover:not(:disabled) {
@@ -266,7 +295,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.95);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -280,11 +309,17 @@
       width: 100%;
       max-width: 400px;
       border: 1px solid var(--gray-600);
+      max-height: 90vh;
+      overflow-y: auto;
     }
     
     .modal-header {
       padding: 20px;
       border-bottom: 1px solid var(--gray-600);
+      position: sticky;
+      top: 0;
+      background: var(--gray-800);
+      z-index: 1;
     }
     
     .modal-title {
@@ -303,6 +338,9 @@
       display: flex;
       gap: 12px;
       justify-content: flex-end;
+      position: sticky;
+      bottom: 0;
+      background: var(--gray-800);
     }
     
     .modal-btn {
@@ -351,10 +389,14 @@
       color: var(--gray-400);
     }
     
+    .file-input-container {
+      width: 100%;
+      position: relative;
+    }
+    
     .file-input-label {
       display: block;
       width: 100%;
-      aspect-ratio: 1/1.428;
       background: var(--gray-600);
       border: 2px dashed var(--gray-400);
       border-radius: 8px;
@@ -364,6 +406,7 @@
       justify-content: center;
       cursor: pointer;
       transition: border-color 0.2s;
+      position: relative;
     }
     
     .file-input-label:hover {
@@ -380,22 +423,45 @@
       color: var(--gray-400);
       font-size: 16px;
       text-align: center;
+      padding: 40px 20px;
     }
     
     .file-input {
       display: none;
     }
     
+    /* Preview dengan tinggi 70% dari lebar */
+    .preview-container {
+      width: 100%;
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
     .preview-image {
       width: 100%;
-      height: 100%;
+      display: block;
       object-fit: cover;
       border-radius: 8px;
     }
     
+    .preview-notasi {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(0, 0, 0, 0.85);
+      color: var(--white);
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      max-width: calc(100% - 30px);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
     /* Utility Classes */
     .hidden {
-      display: none;
+      display: none !important;
     }
     
     .text-center {
@@ -417,6 +483,45 @@
     
     .tab-content.active {
       display: block;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .main-artefak {
+        margin-left: -15px;
+        margin-right: -15px;
+      }
+      
+      .main-artefak-placeholder {
+        margin-left: -15px;
+        margin-right: -15px;
+      }
+      
+      .notasi {
+        top: 15px;
+        left: 15px;
+        font-size: 14px;
+        padding: 8px 16px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .nav-tabs {
+        gap: 8px;
+      }
+      
+      .nav-tab {
+        padding: 6px 12px;
+        font-size: 14px;
+      }
+      
+      .history-grid {
+        gap: 8px;
+      }
     }
   </style>
 </head>
@@ -441,11 +546,13 @@
       <!-- Main Artefak Section -->
       <div class="main-artefak-container">
         <div class="main-artefak-label">Artefak Bulan Ini</div>
-        <div class="main-artefak" id="main-artefak">
-          <!-- Artefak utama akan dimuat di sini -->
+        <div class="main-artefak-wrapper">
+          <div class="main-artefak" id="main-artefak">
+            <!-- Artefak utama akan dimuat di sini -->
+          </div>
         </div>
         
-        <div class="text-center mt-4">
+        <div class="upload-section">
           <button class="upload-btn" id="upload-main-btn">
             Unggah Artefak Baru
           </button>
@@ -493,16 +600,18 @@
       <div class="modal-body">
         <div class="form-group">
           <div class="form-label">Pilih Foto (Benda, bukan wajah)</div>
-          <label class="file-input-label" id="file-input-label">
-            <div class="file-input-icon">📷</div>
-            <div class="file-input-text">Tap untuk memilih foto</div>
-            <div class="file-input-text" style="font-size: 12px; margin-top: 8px;">
-              Ukuran optimal: tinggi 70% dari lebar
+          <div class="file-input-container">
+            <label class="file-input-label" id="file-input-label">
+              <div class="file-input-icon">📷</div>
+              <div class="file-input-text">Tap untuk memilih foto</div>
+              <div class="file-input-text" style="font-size: 12px; margin-top: 8px;">
+                Foto akan ditampilkan dengan tinggi 70% dari lebar layar
+              </div>
+              <input type="file" id="file-input" class="file-input" accept="image/*" capture="environment">
+            </label>
+            <div id="image-preview" class="preview-container hidden">
+              <!-- Preview akan diisi oleh JavaScript -->
             </div>
-            <input type="file" id="file-input" class="file-input" accept="image/*" capture="environment">
-          </label>
-          <div id="image-preview" class="hidden">
-            <img id="preview-image" class="preview-image" alt="Preview">
           </div>
         </div>
         
@@ -542,6 +651,7 @@
     let currentMainArtefak = null;
     let artefakHistory = [];
     let selectedFile = null;
+    let screenWidth = window.innerWidth;
     
     // ============ ELEMENTS ============
     const elements = {
@@ -564,12 +674,34 @@
       fileInputLabel: document.getElementById('file-input-label'),
       fileInput: document.getElementById('file-input'),
       imagePreview: document.getElementById('image-preview'),
-      previewImage: document.getElementById('preview-image'),
       notasiInput: document.getElementById('notasi-input'),
       wordCount: document.getElementById('word-count'),
       cancelBtn: document.getElementById('cancel-btn'),
       submitBtn: document.getElementById('submit-btn')
     };
+    
+    // ============ FUNGSI UTILITAS ============
+    
+    // Hitung tinggi berdasarkan 70% dari lebar layar
+    function calculateArtefakHeight() {
+      screenWidth = window.innerWidth;
+      return Math.floor(screenWidth * 0.7);
+    }
+    
+    // Set tinggi elemen artefak
+    function setArtefakHeight(element, height) {
+      element.style.height = `${height}px`;
+    }
+    
+    // Format tanggal
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
     
     // ============ INITIALIZE ============
     async function initializeApp() {
@@ -588,14 +720,14 @@
         // 3. Setup Event Listeners
         setupEventListeners();
         
-        // 4. Cek Session (gunakan localStorage untuk demo)
+        // 4. Cek Session
         const savedUser = localStorage.getItem('nope_user');
         if (savedUser) {
           currentUser = JSON.parse(savedUser);
           elements.greeting.textContent = `Hello @${currentUser.username}`;
           await loadJejakData();
         } else {
-          // Auto login untuk demo (bisa diganti dengan form login)
+          // Auto login untuk demo
           currentUser = {
             username: 'senja nope',
             id: 'senja_nope'
@@ -608,9 +740,29 @@
         // 5. Update cooldown timer
         updateCooldownTimer();
         
+        // 6. Set initial height untuk placeholder
+        updateArtefakHeight();
+        
       } catch (error) {
         console.error('❌ Initialization error:', error);
         alert('Gagal memuat aplikasi. Silakan refresh halaman.');
+      }
+    }
+    
+    // Update tinggi artefak saat resize
+    function updateArtefakHeight() {
+      const height = calculateArtefakHeight();
+      
+      // Update main artefak jika ada
+      const mainImage = elements.mainArtefak.querySelector('.main-artefak-image');
+      if (mainImage) {
+        setArtefakHeight(mainImage, height);
+      }
+      
+      // Update placeholder jika ada
+      const placeholder = elements.mainArtefak.querySelector('.main-artefak-placeholder');
+      if (placeholder) {
+        setArtefakHeight(placeholder, height);
       }
     }
     
@@ -647,6 +799,25 @@
       // Modal Buttons
       elements.cancelBtn.addEventListener('click', hideUploadModal);
       elements.submitBtn.addEventListener('click', submitArtefak);
+      
+      // Resize window
+      window.addEventListener('resize', debounce(() => {
+        updateArtefakHeight();
+        updatePreviewHeight();
+      }, 250));
+    }
+    
+    // Debounce function untuk resize
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
     }
     
     // ============ JEJAK DATA MANAGEMENT ============
@@ -701,24 +872,24 @@
     }
     
     function renderMainArtefak(artefak) {
-      elements.mainArtefak.innerHTML = '';
+      const height = calculateArtefakHeight();
       
-      const img = document.createElement('img');
-      img.className = 'main-artefak-image';
-      img.src = artefak.image_url;
-      img.alt = artefak.notasi;
-      
-      const notasi = document.createElement('div');
-      notasi.className = 'notasi';
-      notasi.textContent = artefak.notasi;
-      
-      elements.mainArtefak.appendChild(img);
-      elements.mainArtefak.appendChild(notasi);
+      elements.mainArtefak.innerHTML = `
+        <img class="main-artefak-image" 
+             src="${artefak.image_url}" 
+             alt="${artefak.notasi}"
+             style="height: ${height}px;">
+        <div class="notasi-overlay">
+          <div class="notasi">${artefak.notasi}</div>
+        </div>
+      `;
     }
     
     function renderMainArtefakPlaceholder() {
+      const height = calculateArtefakHeight();
+      
       elements.mainArtefak.innerHTML = `
-        <div class="main-artefak-placeholder">
+        <div class="main-artefak-placeholder" style="height: ${height}px;">
           <div class="placeholder-icon">📸</div>
           <div class="placeholder-text">
             Belum ada artefak Jejak.<br>
@@ -739,7 +910,7 @@
         if (i < history.length) {
           const artefak = history[i];
           card.innerHTML = `
-            <img src="${artefak.image_url}" alt="${artefak.notasi}">
+            <img src="${artefak.image_url}" alt="${artefak.notasi}" loading="lazy">
             <div class="history-notasi">${artefak.notasi}</div>
           `;
         } else {
@@ -792,12 +963,38 @@
       // Tampilkan preview
       const reader = new FileReader();
       reader.onload = function(e) {
-        elements.previewImage.src = e.target.result;
-        elements.imagePreview.classList.remove('hidden');
-        elements.fileInputLabel.classList.add('hidden');
+        renderImagePreview(e.target.result);
         validateForm();
       };
       reader.readAsDataURL(file);
+    }
+    
+    function renderImagePreview(imageData) {
+      const height = calculateArtefakHeight();
+      const notasi = elements.notasiInput.value.trim();
+      
+      elements.imagePreview.innerHTML = `
+        <div style="position: relative;">
+          <img class="preview-image" 
+               src="${imageData}" 
+               alt="Preview"
+               style="height: ${height}px;">
+          ${notasi ? `<div class="preview-notasi">${notasi}</div>` : ''}
+        </div>
+      `;
+      
+      elements.imagePreview.classList.remove('hidden');
+      elements.fileInputLabel.classList.add('hidden');
+    }
+    
+    function updatePreviewHeight() {
+      if (!selectedFile) return;
+      
+      const previewImg = elements.imagePreview.querySelector('.preview-image');
+      if (previewImg) {
+        const height = calculateArtefakHeight();
+        previewImg.style.height = `${height}px`;
+      }
     }
     
     function updateWordCount() {
@@ -810,6 +1007,23 @@
         elements.wordCount.style.color = '#ef4444';
       } else {
         elements.wordCount.style.color = 'var(--gray-400)';
+      }
+      
+      // Update preview jika ada
+      if (selectedFile) {
+        const previewNotasi = elements.imagePreview.querySelector('.preview-notasi');
+        if (previewNotasi) {
+          previewNotasi.textContent = text;
+        } else if (text) {
+          // Tambah notasi jika belum ada
+          const previewContainer = elements.imagePreview.querySelector('div');
+          if (previewContainer) {
+            const notasiEl = document.createElement('div');
+            notasiEl.className = 'preview-notasi';
+            notasiEl.textContent = text;
+            previewContainer.appendChild(notasiEl);
+          }
+        }
       }
       
       validateForm();
