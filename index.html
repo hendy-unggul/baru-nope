@@ -33,11 +33,29 @@
       margin-bottom: 24px;
     }
     .header {
-      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
     }
     .greeting {
       font-size: 20px;
-      margin-bottom: 16px;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .nav-tab {
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: color 0.2s ease;
+    }
+    .nav-tab.active {
+      color: var(--accent-blue);
+      border-bottom: 2px solid var(--accent-blue);
     }
     .artefak-card {
       position: relative;
@@ -142,9 +160,36 @@
       <div class="logo">NOPE</div>
       <div class="header">
         <div class="greeting" id="greeting">Hello @user</div>
+        <div class="nav-tabs">
+          <div class="nav-tab active" data-tab="jejak">Jejak</div>
+          <div class="nav-tab" data-tab="jalan">Jalan</div>
+          <div class="nav-tab" data-tab="dunia">Dunia</div>
+          <div class="nav-tab" data-tab="jelajah">Jelajah</div>
+        </div>
       </div>
-      <div class="artefak-tray" id="artefak-tray">
-        <!-- 6 artefak akan muncul di sini -->
+
+      <div id="jejak-tab" class="tab-content">
+        <div class="artefak-tray" id="jejak-tray">
+          <!-- 6 artefak Jejak -->
+        </div>
+      </div>
+
+      <div id="jalan-tab" class="tab-content hidden">
+        <div class="artefak-tray" id="jalan-tray">
+          <!-- 6 artefak Jalan -->
+        </div>
+      </div>
+
+      <div id="dunia-tab" class="tab-content hidden">
+        <div class="artefak-tray" id="dunia-tray">
+          <!-- 6 artefak Dunia -->
+        </div>
+      </div>
+
+      <div id="jelajah-tab" class="tab-content hidden">
+        <div class="artefak-tray" id="jelajah-tray">
+          <!-- 6 artefak Jelajah -->
+        </div>
       </div>
     </div>
   </div>
@@ -170,7 +215,8 @@
     const usernameInput = document.getElementById('username-input');
     const loginBtn = document.getElementById('login-btn');
     const greetingEl = document.getElementById('greeting');
-    const artefakTray = document.getElementById('artefak-tray');
+    const navTabs = document.querySelectorAll('.nav-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
 
     document.addEventListener('DOMContentLoaded', () => {
       const saved = localStorage.getItem('currentUser');
@@ -179,7 +225,7 @@
         greetingEl.textContent = `Hello @${currentUser.username}`;
         loginView.classList.add('hidden');
         mainView.classList.remove('hidden');
-        loadArtefaks();
+        loadArtefaks('jejak');
       }
     });
 
@@ -194,11 +240,25 @@
       greetingEl.textContent = `Hello @${username}`;
       loginView.classList.add('hidden');
       mainView.classList.remove('hidden');
-      loadArtefaks();
+      loadArtefaks('jejak');
     });
 
-    async function loadArtefaks() {
-      artefakTray.innerHTML = '';
+    // Tab Navigation
+    navTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        navTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        tabContents.forEach(content => content.classList.add('hidden'));
+        document.getElementById(`${tab.dataset.tab}-tab`).classList.remove('hidden');
+        loadArtefaks(tab.dataset.tab);
+      });
+    });
+
+    async function loadArtefaks(tabName) {
+      const trayId = `${tabName}-tray`;
+      const tray = document.getElementById(trayId);
+      tray.innerHTML = '';
+
       for (let i = 0; i < 6; i++) {
         const card = document.createElement('div');
         card.className = 'artefak-card';
@@ -206,7 +266,7 @@
           const btn = document.createElement('div');
           btn.className = 'upload-btn';
           btn.textContent = 'Unggah';
-          btn.addEventListener('click', uploadArtefak);
+          btn.addEventListener('click', () => uploadArtefak(tabName));
           card.appendChild(btn);
         } else {
           const placeholder = document.createElement('div');
@@ -219,18 +279,19 @@
           placeholder.textContent = '—';
           card.appendChild(placeholder);
         }
-        artefakTray.appendChild(card);
+        tray.appendChild(card);
       }
 
       // ✅ Gunakan window.supabase.from
       const { data, error } = await window.supabase
         .from('artefaks')
         .select('*')
+        .eq('category', tabName) // Tambahkan kolom category di tabel artefaks
         .order('created_at', { ascending: false })
         .limit(5);
 
       if (!error && data && data.length > 0) {
-        const cards = artefakTray.querySelectorAll('.artefak-card');
+        const cards = tray.querySelectorAll('.artefak-card');
         data.forEach((artefak, idx) => {
           if (idx + 1 < cards.length) {
             const card = cards[idx + 1];
@@ -251,7 +312,7 @@
       }
     }
 
-    async function uploadArtefak() {
+    async function uploadArtefak(category) {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
@@ -278,21 +339,22 @@
         const notasi = prompt('Masukkan notasi (maks 4 kata):', 'Senja abadi');
         if (!notasi) return;
 
-        // ✅ Gunakan window.supabase.from
+        // ✅ Gunakan window.supabase.from + tambahkan category
         const { error: insertError } = await window.supabase
           .from('artefaks')
           .insert({
             user_id: currentUser.username,
             image_url: publicUrl,
             notasi: notasi,
-            note: ''
+            note: '',
+            category: category // Kolom baru untuk membedakan Jejak/Jalan/Dunia/Jelajah
           });
 
         if (insertError) {
           alert('Gagal simpan metadata.');
           console.error(insertError);
         } else {
-          loadArtefaks();
+          loadArtefaks(category);
         }
       };
       input.click();
