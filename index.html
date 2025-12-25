@@ -153,14 +153,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    // 🔑 GANTI DUA BARIS INI DENGAN DATA DARI DASHBOARD SUPABASE-MU
+    // 🔑 GANTI DENGAN DATA DARI DASHBOARD SUPABASE-MU
     const SUPABASE_URL = 'https://nmgquhrqfdbhhmcntrwx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tcWN1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUwNTQzMzMsImV4cCI6MjA1MDYzMDMzM30.eL7W8b4K7rN7vT8tDf9P3e3o1gXz3V3m';
 
-    // Inisialisasi Supabase hanya sekali
-    if (!window.supabase) {
-      window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
+    // Inisialisasi Supabase
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentUser = null;
 
@@ -221,13 +219,14 @@
         artefakTray.appendChild(card);
       }
 
-      const { data, error } = await window.supabase
+      // ✅ Gunakan supabase.from (bukan window.supabase.from)
+      const { data, error } = await supabase
         .from('artefaks')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (!error && data) {
+      if (!error && data && data.length > 0) {
         const cards = artefakTray.querySelectorAll('.artefak-card');
         data.forEach((artefak, idx) => {
           if (idx + 1 < cards.length) {
@@ -258,7 +257,7 @@
         if (!file) return;
 
         const filePath = `public/${currentUser.username.replace(/\s+/g, '_')}/${Date.now()}.jpg`;
-        const { data, error } = await window.supabase.storage
+        const { data, error } = await supabase.storage
           .from('artefak')
           .upload(filePath, file, { contentType: 'image/jpeg', upsert: false });
 
@@ -268,8 +267,7 @@
           return;
         }
 
-        // ✅ PERBAIKAN UTAMA: Ambil publicUrl dari .data
-        const { data: publicUrlData } = window.supabase.storage
+        const {  publicUrlData } = supabase.storage
           .from('artefak')
           .getPublicUrl(data.path);
         const publicUrl = publicUrlData.publicUrl;
@@ -277,7 +275,8 @@
         const notasi = prompt('Masukkan notasi (maks 4 kata):', 'Senja abadi');
         if (!notasi) return;
 
-        const { error: insertError } = await window.supabase
+        // ✅ Gunakan supabase.from (bukan window.supabase.from)
+        const { error: insertError } = await supabase
           .from('artefaks')
           .insert({
             user_id: currentUser.username,
