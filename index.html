@@ -1,300 +1,663 @@
-<script>
-  // 🔑 GANTI DENGAN DATA DARI DASHBOARD SUPABASE-MU
-  const SUPABASE_URL = 'https://nmgquhrqfdbhhmcntrwx.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tcWN1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUwNTQzMzMsImV4cCI6MjA1MDYzMDMzM30.eL7W8b4K7rN7vT8tDf9P3e3o1gXz3V3m';
-
-  // Inisialisasi Supabase hanya sekali
-  if (typeof window.supabase === 'undefined') {
-    const { createClient } = supabase;
-    window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
-
-  let currentUser = null;
-
-  const loginView = document.getElementById('login-view');
-  const mainView = document.getElementById('main-view');
-  const usernameInput = document.getElementById('username-input');
-  const loginBtn = document.getElementById('login-btn');
-  const greetingEl = document.getElementById('greeting');
-  const navTabs = document.querySelectorAll('.nav-tab');
-  const tabContents = document.querySelectorAll('.tab-content');
-
-  // ✅ KUNCI PERUBAHAN: Periksa session storage, bukan localStorage
-  document.addEventListener('DOMContentLoaded', () => {
-    // Hapus localStorage lama jika ada (untuk migrasi)
-    localStorage.removeItem('currentUser');
-    
-    // Periksa sessionStorage (hanya berlaku selama tab browser terbuka)
-    const sessionUser = sessionStorage.getItem('nope_currentUser');
-    
-    if (sessionUser) {
-      try {
-        currentUser = JSON.parse(sessionUser);
-        greetingEl.textContent = `Hello @${currentUser.username}`;
-        loginView.classList.add('hidden');
-        mainView.classList.remove('hidden');
-        loadArtefaks('jejak');
-        
-        // Tambahkan tab Jelajah dengan CTA Logout
-        setupJelajahTab();
-      } catch (e) {
-        // Jika ada error, reset ke login
-        sessionStorage.removeItem('nope_currentUser');
-        showLogin();
-      }
-    } else {
-      // Tampilkan halaman login
-      showLogin();
-    }
-  });
-
-  function showLogin() {
-    loginView.classList.remove('hidden');
-    mainView.classList.add('hidden');
-    usernameInput.focus();
-  }
-
-  loginBtn.addEventListener('click', () => {
-    const username = usernameInput.value.trim();
-    if (!username || username.split(' ').length !== 2) {
-      alert('Username harus terdiri dari 2 kata, misal: "senja nope"');
-      return;
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOPE</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  
+  <!-- LOAD SUPABASE DULU -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    :root {
+      --deep-black: #000000;
+      --white: #ffffff;
+      --accent-blue: #4903fc;
+      --logo-red: #ff9999;
+      --border-radius: 12px;
     }
     
-    currentUser = { 
-      username,
-      loginTime: new Date().toISOString()
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    
+    body {
+      background-color: var(--deep-black);
+      color: var(--white);
+      padding: 24px;
+      min-height: 100vh;
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--logo-red);
+      margin-bottom: 24px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    
+    .greeting {
+      font-size: 20px;
+    }
+    
+    .nav-tabs {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .nav-tab {
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: color 0.2s ease;
+    }
+    
+    .nav-tab.active {
+      color: var(--accent-blue);
+      border-bottom: 2px solid var(--accent-blue);
+    }
+    
+    .artefak-card {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+      border-radius: var(--border-radius);
+      background: #111;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    
+    .artefak-card:hover,
+    .artefak-card:focus {
+      transform: scale(1.02);
+    }
+    
+    .artefak-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .notasi {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      max-width: 90%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .upload-btn {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.05);
+      border: 2px dashed rgba(255,255,255,0.3);
+      border-radius: var(--border-radius);
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    
+    .upload-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .artefak-tray {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    
+    .login-form, .main-view {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--border-radius);
+      color: white;
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+    
+    input[type="text"]::placeholder {
+      color: rgba(255,255,255,0.4);
+    }
+    
+    button {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent-blue);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    
+    button:hover {
+      opacity: 0.9;
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    
+    .error-message {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      padding: 12px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Loading State -->
+    <div id="loading-view" style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    ">
+      <div class="logo">NOPE</div>
+      <div style="margin-top: 20px; color: rgba(255,255,255,0.7);">
+        Memuat aplikasi...
+      </div>
+    </div>
+
+    <!-- Login View -->
+    <div id="login-view" class="login-form hidden">
+      <div class="logo">NOPE</div>
+      <h1 style="margin-bottom: 24px;">Masuk dengan username</h1>
+      <input type="text" id="username-input" placeholder="Contoh: senja nope" maxlength="30" />
+      <button id="login-btn">Masuk</button>
+      <div id="login-error" class="error-message hidden"></div>
+      <p style="margin-top: 24px; color: rgba(255,255,255,0.5); font-size: 14px;">
+        Masukkan 2 kata untuk mulai menjelajah
+      </p>
+    </div>
+
+    <!-- Main View -->
+    <div id="main-view" class="main-view hidden">
+      <div class="logo">NOPE</div>
+      <div class="header">
+        <div class="greeting" id="greeting">Hello @user</div>
+        <div class="nav-tabs">
+          <div class="nav-tab active" data-tab="jejak">Jejak</div>
+          <div class="nav-tab" data-tab="jalan">Jalan</div>
+          <div class="nav-tab" data-tab="dunia">Dunia</div>
+          <div class="nav-tab" data-tab="jelajah">Jelajah</div>
+        </div>
+      </div>
+
+      <div id="jejak-tab" class="tab-content">
+        <div class="artefak-tray" id="jejak-tray">
+          <!-- Artefak Jejak -->
+        </div>
+      </div>
+
+      <div id="jalan-tab" class="tab-content hidden">
+        <div class="artefak-tray" id="jalan-tray">
+          <!-- Artefak Jalan -->
+        </div>
+      </div>
+
+      <div id="dunia-tab" class="tab-content hidden">
+        <div class="artefak-tray" id="dunia-tray">
+          <!-- Artefak Dunia -->
+        </div>
+      </div>
+
+      <div id="jelajah-tab" class="tab-content hidden">
+        <div class="artefak-tray" id="jelajah-tray">
+          <!-- Artefak Jelajah -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============ KONFIGURASI ============
+    const SUPABASE_URL = 'https://nmgquhrqfdbhhmcntrwx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tcWN1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUwNTQzMzMsImV4cCI6MjA1MDYzMDMzM30.eL7W8b4K7rN7vT8tDf9P3e3o1gXz3V3m';
+    
+    // ============ VARIABEL GLOBAL ============
+    let supabaseClient = null;
+    let currentUser = null;
+    
+    // ============ ELEMENTS ============
+    const elements = {
+      loadingView: document.getElementById('loading-view'),
+      loginView: document.getElementById('login-view'),
+      mainView: document.getElementById('main-view'),
+      usernameInput: document.getElementById('username-input'),
+      loginBtn: document.getElementById('login-btn'),
+      loginError: document.getElementById('login-error'),
+      greeting: document.getElementById('greeting'),
+      navTabs: document.querySelectorAll('.nav-tab'),
+      tabContents: document.querySelectorAll('.tab-content')
     };
     
-    // ✅ Simpan di sessionStorage, bukan localStorage
-    sessionStorage.setItem('nope_currentUser', JSON.stringify(currentUser));
-    
-    greetingEl.textContent = `Hello @${username}`;
-    loginView.classList.add('hidden');
-    mainView.classList.remove('hidden');
-    loadArtefaks('jejak');
-    setupJelajahTab();
-  });
-
-  // Tab Navigation
-  navTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      navTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      tabContents.forEach(content => content.classList.add('hidden'));
-      document.getElementById(`${tab.dataset.tab}-tab`).classList.remove('hidden');
+    // ============ INITIALIZE ============
+    async function initializeApp() {
+      console.log('🔄 Initializing NOPE app...');
       
-      if (tab.dataset.tab === 'jelajah') {
-        loadJelajahTab();
-      } else {
-        loadArtefaks(tab.dataset.tab);
-      }
-    });
-  });
-
-  // ✅ Fungsi untuk setup tab Jelajah
-  function setupJelajahTab() {
-    // Pastikan ada 4 nav tabs
-    const navContainer = document.querySelector('.nav-tabs');
-    if (navContainer.children.length === 4) {
-      // Tab Jelajah sudah ada
-      return;
-    }
-  }
-
-  // ✅ Fungsi khusus untuk tab Jelajah
-  async function loadJelajahTab() {
-    const tray = document.getElementById('jelajah-tray');
-    tray.innerHTML = '';
-    
-    // Kartu 1: Setting User
-    const settingCard = document.createElement('div');
-    settingCard.className = 'artefak-card';
-    const settingContent = document.createElement('div');
-    settingContent.style.padding = '16px';
-    settingContent.style.height = '100%';
-    settingContent.style.display = 'flex';
-    settingContent.style.flexDirection = 'column';
-    settingContent.style.justifyContent = 'space-between';
-    
-    // Info User
-    const userInfo = document.createElement('div');
-    userInfo.innerHTML = `
-      <h3 style="margin-bottom: 8px; color: var(--accent-blue);">Pengaturan</h3>
-      <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 16px;">
-        Username: <strong>${currentUser.username}</strong><br>
-        Login: ${new Date(currentUser.loginTime).toLocaleTimeString('id-ID')}
-      </p>
-    `;
-    
-    // Tombol Logout
-    const logoutBtn = document.createElement('button');
-    logoutBtn.textContent = 'Logout';
-    logoutBtn.style.background = 'transparent';
-    logoutBtn.style.border = '1px solid rgba(255,255,255,0.3)';
-    logoutBtn.style.marginTop = '16px';
-    logoutBtn.addEventListener('click', handleLogout);
-    
-    settingContent.appendChild(userInfo);
-    settingContent.appendChild(logoutBtn);
-    settingCard.appendChild(settingContent);
-    tray.appendChild(settingCard);
-    
-    // Kartu 2-6: Fitur Jelajah lainnya
-    const jelajahFeatures = [
-      { title: 'Trending', desc: 'Artefak viral hari ini' },
-      { title: 'Discovery', desc: 'Temukan pengguna baru' },
-      { title: 'Peta Jejak', desc: 'Visualisasi perjalanan' },
-      { title: 'Statistik', desc: 'Aktivitas Anda' },
-      { title: 'Komunitas', desc: 'Grup dan diskusi' }
-    ];
-    
-    for (let i = 0; i < 5; i++) {
-      const card = document.createElement('div');
-      card.className = 'artefak-card';
-      const content = document.createElement('div');
-      content.style.padding = '16px';
-      content.style.height = '100%';
-      content.style.display = 'flex';
-      content.style.flexDirection = 'column';
-      content.style.justifyContent = 'center';
-      
-      content.innerHTML = `
-        <h3 style="margin-bottom: 8px; color: var(--accent-blue);">${jelajahFeatures[i].title}</h3>
-        <p style="font-size: 12px; color: rgba(255,255,255,0.5);">
-          ${jelajahFeatures[i].desc}
-        </p>
-      `;
-      
-      card.appendChild(content);
-      tray.appendChild(card);
-    }
-  }
-
-  // ✅ Fungsi Logout
-  function handleLogout() {
-    if (confirm('Yakin ingin logout?')) {
-      // Hapus session
-      sessionStorage.removeItem('nope_currentUser');
-      currentUser = null;
-      
-      // Reset form
-      usernameInput.value = '';
-      
-      // Tampilkan login
-      showLogin();
-      
-      // Reset tab ke Jejak
-      navTabs.forEach(t => t.classList.remove('active'));
-      document.querySelector('.nav-tab[data-tab="jejak"]').classList.add('active');
-      tabContents.forEach(content => content.classList.add('hidden'));
-      document.getElementById('jejak-tab').classList.remove('hidden');
-    }
-  }
-
-  async function loadArtefaks(tabName) {
-    const trayId = `${tabName}-tray`;
-    const tray = document.getElementById(trayId);
-    tray.innerHTML = '';
-
-    for (let i = 0; i < 6; i++) {
-      const card = document.createElement('div');
-      card.className = 'artefak-card';
-      if (i === 0) {
-        const btn = document.createElement('div');
-        btn.className = 'upload-btn';
-        btn.textContent = 'Unggah';
-        btn.addEventListener('click', () => uploadArtefak(tabName));
-        card.appendChild(btn);
-      } else {
-        const placeholder = document.createElement('div');
-        placeholder.style.backgroundColor = '#222';
-        placeholder.style.display = 'flex';
-        placeholder.style.alignItems = 'center';
-        placeholder.style.justifyContent = 'center';
-        placeholder.style.color = '#555';
-        placeholder.style.height = '100%';
-        placeholder.textContent = '—';
-        card.appendChild(placeholder);
-      }
-      tray.appendChild(card);
-    }
-
-    // ✅ Gunakan window.supabase.from
-    const { data, error } = await window.supabase
-      .from('artefaks')
-      .select('*')
-      .eq('category', tabName)
-      .eq('user_id', currentUser.username)
-      .order('created_at', { ascending: false })
-      .limit(5);
-
-    if (!error && data && data.length > 0) {
-      const cards = tray.querySelectorAll('.artefak-card');
-      data.forEach((artefak, idx) => {
-        if (idx + 1 < cards.length) {
-          const card = cards[idx + 1];
-          card.innerHTML = '';
-          const img = document.createElement('img');
-          img.src = artefak.image_url;
-          img.alt = 'Artefak';
-          img.loading = 'lazy';
-          card.appendChild(img);
-          if (artefak.notasi) {
-            const notasi = document.createElement('div');
-            notasi.className = 'notasi';
-            notasi.textContent = artefak.notasi;
-            card.appendChild(notasi);
-          }
+      try {
+        // 1. Cek apakah Supabase tersedia
+        if (typeof supabase === 'undefined') {
+          throw new Error('Supabase library not loaded!');
         }
+        
+        // 2. Inisialisasi Supabase Client
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { persistSession: false }
+        });
+        
+        console.log('✅ Supabase initialized');
+        
+        // 3. Setup event listeners
+        setupEventListeners();
+        
+        // 4. Cek session
+        await checkSession();
+        
+        // 5. Sembunyikan loading
+        elements.loadingView.style.display = 'none';
+        
+      } catch (error) {
+        console.error('❌ Initialization error:', error);
+        showError('Gagal memuat aplikasi. Silakan refresh halaman.');
+      }
+    }
+    
+    // ============ SESSION MANAGEMENT ============
+    async function checkSession() {
+      const sessionUser = sessionStorage.getItem('nope_currentUser');
+      
+      if (sessionUser) {
+        try {
+          currentUser = JSON.parse(sessionUser);
+          console.log('✅ Session found:', currentUser);
+          
+          // Update UI
+          elements.greeting.textContent = `Hello @${currentUser.username}`;
+          showMainView();
+          await loadArtefaks('jejak');
+          
+        } catch (error) {
+          console.error('❌ Session error:', error);
+          sessionStorage.removeItem('nope_currentUser');
+          showLoginView();
+        }
+      } else {
+        console.log('ℹ️ No session found');
+        showLoginView();
+      }
+    }
+    
+    // ============ VIEW MANAGEMENT ============
+    function showLoading() {
+      elements.loadingView.style.display = 'flex';
+      elements.loginView.classList.add('hidden');
+      elements.mainView.classList.add('hidden');
+    }
+    
+    function showLoginView() {
+      elements.loadingView.style.display = 'none';
+      elements.loginView.classList.remove('hidden');
+      elements.mainView.classList.add('hidden');
+      
+      if (elements.usernameInput) {
+        elements.usernameInput.focus();
+      }
+    }
+    
+    function showMainView() {
+      elements.loadingView.style.display = 'none';
+      elements.loginView.classList.add('hidden');
+      elements.mainView.classList.remove('hidden');
+    }
+    
+    function showError(message, element = null) {
+      if (element) {
+        element.textContent = message;
+        element.classList.remove('hidden');
+      } else {
+        alert(message);
+      }
+    }
+    
+    // ============ EVENT LISTENERS ============
+    function setupEventListeners() {
+      // Login button
+      if (elements.loginBtn) {
+        elements.loginBtn.addEventListener('click', handleLogin);
+      }
+      
+      // Enter key on username input
+      if (elements.usernameInput) {
+        elements.usernameInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            handleLogin();
+          }
+        });
+      }
+      
+      // Navigation tabs
+      elements.navTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          // Update active tab
+          elements.navTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          
+          // Show corresponding content
+          elements.tabContents.forEach(content => content.classList.add('hidden'));
+          document.getElementById(`${tab.dataset.tab}-tab`).classList.remove('hidden');
+          
+          // Load content
+          if (tab.dataset.tab === 'jelajah') {
+            loadJelajahTab();
+          } else {
+            loadArtefaks(tab.dataset.tab);
+          }
+        });
       });
     }
-  }
-
-  async function uploadArtefak(category) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const filePath = `public/${currentUser.username.replace(/\s+/g, '_')}/${Date.now()}.jpg`;
-      const { data, error } = await window.supabase.storage
-        .from('artefak')
-        .upload(filePath, file, { contentType: 'image/jpeg', upsert: false });
-
-      if (error) {
-        alert('Gagal upload. Coba lagi!');
-        console.error(error);
+    
+    // ============ LOGIN HANDLER ============
+    async function handleLogin() {
+      const username = elements.usernameInput.value.trim();
+      
+      // Validasi username
+      if (!username) {
+        showError('Username tidak boleh kosong', elements.loginError);
         return;
       }
-
-      const { publicUrl } = window.supabase.storage
-        .from('artefak')
-        .getPublicUrl(data.path);
-
-      const notasi = prompt('Masukkan notasi (maks 4 kata):', 'Senja abadi');
-      if (!notasi) return;
-
-      // ✅ Gunakan window.supabase.from + tambahkan category
-      const { error: insertError } = await window.supabase
-        .from('artefaks')
-        .insert({
-          user_id: currentUser.username,
-          image_url: publicUrl,
-          notasi: notasi,
-          note: '',
-          category: category
-        });
-
-      if (insertError) {
-        alert('Gagal simpan metadata.');
-        console.error(insertError);
-      } else {
-        loadArtefaks(category);
+      
+      const words = username.split(' ');
+      if (words.length !== 2) {
+        showError('Username harus terdiri dari 2 kata (misal: "senja nope")', elements.loginError);
+        return;
       }
-    };
-    input.click();
-  }
-</script>
+      
+      // Disable button selama proses
+      elements.loginBtn.disabled = true;
+      elements.loginBtn.textContent = 'Memuat...';
+      
+      try {
+        // Simpan user di session
+        currentUser = {
+          username: username,
+          loginTime: new Date().toISOString(),
+          id: username.replace(/\s+/g, '_').toLowerCase()
+        };
+        
+        sessionStorage.setItem('nope_currentUser', JSON.stringify(currentUser));
+        
+        // Update UI
+        elements.greeting.textContent = `Hello @${username}`;
+        showMainView();
+        
+        // Reset login form
+        elements.usernameInput.value = '';
+        elements.loginError.classList.add('hidden');
+        
+        // Load data pertama
+        await loadArtefaks('jejak');
+        
+        console.log('✅ Login successful:', currentUser);
+        
+      } catch (error) {
+        console.error('❌ Login error:', error);
+        showError('Terjadi kesalahan saat login', elements.loginError);
+      } finally {
+        // Enable button kembali
+        elements.loginBtn.disabled = false;
+        elements.loginBtn.textContent = 'Masuk';
+      }
+    }
+    
+    // ============ LOGOUT HANDLER ============
+    function handleLogout() {
+      if (confirm('Yakin ingin logout?')) {
+        sessionStorage.removeItem('nope_currentUser');
+        currentUser = null;
+        
+        // Reset ke tab jejak
+        elements.navTabs.forEach(tab => tab.classList.remove('active'));
+        elements.navTabs[0].classList.add('active');
+        
+        elements.tabContents.forEach(content => content.classList.add('hidden'));
+        document.getElementById('jejak-tab').classList.remove('hidden');
+        
+        // Kembali ke login
+        showLoginView();
+      }
+    }
+    
+    // ============ LOAD ARTEFAKS ============
+    async function loadArtefaks(tabName) {
+      const trayId = `${tabName}-tray`;
+      const tray = document.getElementById(trayId);
+      
+      if (!tray) return;
+      
+      // Clear tray
+      tray.innerHTML = '';
+      
+      // Buat 6 kartu
+      for (let i = 0; i < 6; i++) {
+        const card = document.createElement('div');
+        card.className = 'artefak-card';
+        
+        if (i === 0) {
+          // Kartu pertama: Upload button
+          const uploadBtn = document.createElement('div');
+          uploadBtn.className = 'upload-btn';
+          uploadBtn.textContent = 'Unggah';
+          uploadBtn.addEventListener('click', () => handleUpload(tabName));
+          card.appendChild(uploadBtn);
+        } else {
+          // Kartu placeholder
+          const placeholder = document.createElement('div');
+          placeholder.style.cssText = `
+            width: 100%;
+            height: 100%;
+            background: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            font-size: 24px;
+          `;
+          placeholder.textContent = '—';
+          card.appendChild(placeholder);
+        }
+        
+        tray.appendChild(card);
+      }
+      
+      // Load data dari Supabase jika ada user
+      if (currentUser && supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('artefaks')
+            .select('*')
+            .eq('category', tabName)
+            .eq('user_id', currentUser.username)
+            .order('created_at', { ascending: false })
+            .limit(5);
+          
+          if (error) throw error;
+          
+          if (data && data.length > 0) {
+            const cards = tray.querySelectorAll('.artefak-card');
+            
+            data.forEach((artefak, index) => {
+              if (index + 1 < cards.length) {
+                const card = cards[index + 1];
+                card.innerHTML = '';
+                
+                // Image
+                const img = document.createElement('img');
+                img.src = artefak.image_url || 'https://via.placeholder.com/300/222/222?text=Artefak';
+                img.alt = artefak.notasi || 'Artefak';
+                img.loading = 'lazy';
+                img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+                card.appendChild(img);
+                
+                // Notasi
+                if (artefak.notasi) {
+                  const notasiEl = document.createElement('div');
+                  notasiEl.className = 'notasi';
+                  notasiEl.textContent = artefak.notasi;
+                  card.appendChild(notasiEl);
+                }
+              }
+            });
+          }
+          
+        } catch (error) {
+          console.error(`❌ Error loading ${tabName}:`, error);
+        }
+      }
+    }
+    
+    // ============ JELAJAH TAB ============
+    async function loadJelajahTab() {
+      const tray = document.getElementById('jelajah-tray');
+      if (!tray || !currentUser) return;
+      
+      tray.innerHTML = '';
+      
+      // Kartu 1: Settings dengan logout
+      const settingsCard = document.createElement('div');
+      settingsCard.className = 'artefak-card';
+      settingsCard.innerHTML = `
+        <div style="padding: 16px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h3 style="color: var(--accent-blue); margin-bottom: 12px;">Pengaturan</h3>
+            <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px;">
+              <strong>Username:</strong> ${currentUser.username}
+            </p>
+            <p style="font-size: 12px; color: rgba(255,255,255,0.5);">
+              Login: ${new Date(currentUser.loginTime).toLocaleTimeString('id-ID')}
+            </p>
+          </div>
+          <button id="logout-btn" style="
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 16px;
+          ">
+            Logout
+          </button>
+        </div>
+      `;
+      tray.appendChild(settingsCard);
+      
+      // Setup logout button
+      setTimeout(() => {
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', handleLogout);
+        }
+      }, 100);
+      
+      // Kartu 2-6: Fitur jelajah
+      const features = [
+        { title: 'Trending', desc: 'Artefak viral hari ini' },
+        { title: 'Discovery', desc: 'Temukan pengguna baru' },
+        { title: 'Peta Jejak', desc: 'Visualisasi perjalanan' },
+        { title: 'Statistik', desc: 'Aktivitas Anda' },
+        { title: 'Komunitas', desc: 'Grup dan diskusi' }
+      ];
+      
+      features.forEach(feature => {
+        const card = document.createElement('div');
+        card.className = 'artefak-card';
+        card.innerHTML = `
+          <div style="padding: 16px; height: 100%; display: flex; flex-direction: column; justify-content: center;">
+            <h3 style="color: var(--accent-blue); margin-bottom: 8px;">${feature.title}</h3>
+            <p style="font-size: 12px; color: rgba(255,255,255,0.5);">
+              ${feature.desc}
+            </p>
+          </div>
+        `;
+        tray.appendChild(card);
+      });
+    }
+    
+    // ============ UPLOAD HANDLER ============
+    async function handleUpload(category) {
+      if (!currentUser) {
+        alert('Silakan login terlebih dahulu');
+        return;
+      }
+      
+      alert(`Fitur upload untuk ${category} akan segera aktif!\n\nUntuk testing, data akan disimulasikan.`);
+      
+      // Simulasi upload (nanti bisa diimplementasi dengan Supabase Storage)
+      console.log(`Simulating upload to ${category} for user ${currentUser.username}`);
+    }
+    
+    // ============ START APP ============
+    // Tunggu DOM siap, lalu initialize
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+      initializeApp();
+    }
+  </script>
+</body>
+</html>
