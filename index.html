@@ -76,7 +76,7 @@
       background: var(--input-bg);
       border-radius: var(--radius-10);
       overflow: hidden;
-      margin-bottom: 8px; /* Dikurangi dari 14px */
+      margin-bottom: 8px;
     }
     .artefak-container img {
       position: absolute;
@@ -92,8 +92,8 @@
     .cta-row {
       display: flex;
       justify-content: flex-end;
-      margin-top: 4px; /* Jarak kecil dari artefak container */
-      margin-bottom: 12px; /* Jarak ke rant box */
+      margin-top: 4px;
+      margin-bottom: 12px;
     }
     .impulse-text {
       background: none;
@@ -114,7 +114,7 @@
 
     .rant-box {
       position: relative;
-      margin-bottom: 12px; /* Dikurangi dari 24px */
+      margin-bottom: 12px;
     }
     .rant-box textarea {
       width: 100%;
@@ -151,8 +151,8 @@
     .feed-title {
       color: var(--accent);
       font-size: 1.1rem;
-      margin-top: 8px; /* Dikurangi dari 12px */
-      margin-bottom: 8px; /* Dikurangi dari 12px */
+      margin-top: 8px;
+      margin-bottom: 8px;
       font-weight: 600;
     }
 
@@ -168,17 +168,17 @@
 
     /* --- REVISI 3: TIMESTAMP RANT RATA KIRI --- */
     .rant-timestamp {
-      color: #555; /* Warna samar */
+      color: #555;
       font-size: 0.75rem;
       margin-bottom: 4px;
-      text-align: left; /* Rata kiri */
+      text-align: left;
     }
 
     .artefak-tray {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 6px;
-      margin-top: 12px; /* Dikurangi dari 16px */
+      margin-top: 12px;
       padding-bottom: 100px;
       border-top: 1px solid #222;
       padding-top: 12px;
@@ -208,7 +208,7 @@
       color: #aaa;
       font-style: italic;
       text-align: center;
-      margin-top: 4px; /* Dikurangi drastis dari 12px */
+      margin-top: 4px;
       font-size: 0.9rem;
     }
 
@@ -527,7 +527,7 @@
         const newRant = {
           id: 'rant_' + Date.now(),
           text,
-          time: Date.now(), // Simpan waktu saat unggah
+          time: Date.now(),
           emojis: { '😭': 0, '🔥': 0, '🤡': 0 }
         };
 
@@ -648,15 +648,32 @@
       "Gue nulis ini bukan minta diselamatin. Cuma biar gak sendiri."
     ];
 
-    // PERBAIKAN: Tambahkan properti emojis ke DUMMY_ARTEFAK
-    const DUMMY_ARTEFAK = [
-      { url: "https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=100", note: "Gunung yang menenangkan", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } },
-      { url: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=100", note: "Senja yang membakar", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } },
-      { url: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=100", note: "Langit malam", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } },
-      { url: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=100", note: "Air yang tenang", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } },
-      { url: "https://images.unsplash.com/photo-1480714378409-634531dbc169?auto=format&fit=crop&w=100", note: "Kabut pagi", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } },
-      { url: "https://images.unsplash.com/photo-1506260408123-9e6e537a2e05?auto=format&fit=crop&w=100", note: "Senyum sendirian", emojis: { '😭': 0, '🔥': 0, '🤡': 0 } }
-    ];
+    // --- PERBAIKAN: HAPUS DUMMY_ARTEFAK DAN GANTI DENGAN FUNGSI UNTUK MEMBUATNYA ---
+    // Fungsi untuk membuat artefak dummy jika diperlukan
+    function getDummyArtefak(index) {
+      const dummyUrls = [
+        "https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=100",
+        "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=100",
+        "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=100",
+        "https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=100",
+        "https://images.unsplash.com/photo-1480714378409-634531dbc169?auto=format&fit=crop&w=100",
+        "https://images.unsplash.com/photo-1506260408123-9e6e537a2e05?auto=format&fit=crop&w=100"
+      ];
+      const dummyNotes = [
+        "Gunung yang menenangkan",
+        "Senja yang membakar",
+        "Langit malam",
+        "Air yang tenang",
+        "Kabut pagi",
+        "Senyum sendirian"
+      ];
+
+      return {
+        url: dummyUrls[index % dummyUrls.length],
+        note: dummyNotes[index % dummyNotes.length],
+        emojis: { '😭': 0, '🔥': 0, '🤡': 0 }
+      };
+    }
 
     // --- FUNGSI BARU: Format Tanggal dd-mmm-yy ---
     function formatDate(timestamp) {
@@ -693,18 +710,24 @@
       `).join('');
     }
 
-    // --- FUNGSI RENDER TRAY YANG DIPERBAIKI ---
+    // --- FUNGSI RENDER TRAY YANG DIPERBAIKI SECARA MENYELURUH ---
     function renderArtefakTray() {
       const tray = document.getElementById('artefak-tray');
       const artefaks = JSON.parse(localStorage.getItem('nopeArtefaks') || '[]');
       let displayedArtefaks = [];
 
       // Ambil 6 artefak pertama (yang paling baru)
-      displayedArtefaks = artefaks.slice(0, 6);
+      const latestArtefaks = artefaks.slice(0, 6);
 
-      // Jika kurang dari 6, isi sisa slot dengan dummy
-      if (displayedArtefaks.length < 6) {
-        displayedArtefaks = [...displayedArtefaks, ...DUMMY_ARTEFAK.slice(0, 6 - displayedArtefaks.length)];
+      // Buat array 6 item untuk ditampilkan
+      for (let i = 0; i < 6; i++) {
+        if (i < latestArtefaks.length) {
+          // Gunakan artefak nyata
+          displayedArtefaks.push(latestArtefaks[i]);
+        } else {
+          // Gunakan artefak dummy
+          displayedArtefaks.push(getDummyArtefak(i));
+        }
       }
 
       // Render tray
