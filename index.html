@@ -155,9 +155,9 @@
   <script>
     // 🔑 GANTI DUA BARIS INI DENGAN DATA DARI DASHBOARD SUPABASE-MU
     const SUPABASE_URL = 'https://nmgquhrqfdbhhmcntrwx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZ3F1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2MjIzNjUsImV4cCI6MjA4MjE5ODM2NX0.0EMNhWe8dEA7fb7ydqo2ek3kKFefYhmTiEIa09A71DU';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tcWN1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUwNTQzMzMsImV4cCI6MjA1MDYzMDMzM30.eL7W8b4K7rN7vT8tDf9P3e3o1gXz3V3m';
 
-    // Pastikan Supabase hanya diinisialisasi sekali
+    // Inisialisasi Supabase hanya sekali
     if (!window.supabase) {
       window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
@@ -268,9 +268,11 @@
           return;
         }
 
-        const {  { publicUrl } } = window.supabase.storage
+        // ✅ PERBAIKAN UTAMA: Ambil publicUrl dari .data
+        const { data: publicUrlData } = window.supabase.storage
           .from('artefak')
           .getPublicUrl(data.path);
+        const publicUrl = publicUrlData.publicUrl;
 
         const notasi = prompt('Masukkan notasi (maks 4 kata):', 'Senja abadi');
         if (!notasi) return;
