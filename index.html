@@ -38,7 +38,6 @@
       margin-bottom: 24px;
     }
 
-    /* Artefak Utama */
     .artefak-main {
       width: 100%;
       aspect-ratio: 1 / 0.7;
@@ -46,6 +45,7 @@
       border-radius: var(--border-radius);
       margin-bottom: 24px;
       position: relative;
+      background: #111;
     }
     .artefak-main img {
       width: 100%;
@@ -64,8 +64,16 @@
       border-radius: 4px;
       max-width: 90%;
     }
+    .upload-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      cursor: pointer;
+    }
 
-    /* Rantbox */
     .rantbox {
       position: relative;
       width: 100%;
@@ -83,7 +91,6 @@
       font-size: 16px;
       resize: none;
       outline: none;
-      font-family: var(--font-family);
     }
     .rantbox textarea::placeholder {
       color: rgba(255,255,255,0.5);
@@ -101,21 +108,9 @@
       cursor: pointer;
     }
 
-    /* Jurnal Rant */
-    .jurnal-rant {
-      margin-bottom: 24px;
-    }
-    .rant-item {
-      margin-bottom: 16px;
-      position: relative;
-    }
-    .rant-timestamp {
-      position: absolute;
-      top: -20px;
-      left: 0;
-      font-size: 12px;
-      color: rgba(255,255,255,0.4);
-    }
+    .jurnal-rant { margin-bottom: 24px; }
+    .rant-item { margin-bottom: 16px; position: relative; }
+    .rant-timestamp { position: absolute; top: -20px; left: 0; font-size: 12px; color: rgba(255,255,255,0.4); }
     .rant-text {
       background: rgba(255,255,255,0.03);
       padding: 12px;
@@ -124,7 +119,6 @@
       line-height: 1.5;
     }
 
-    /* Tray Artefak */
     .artefak-tray {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -138,16 +132,9 @@
       cursor: pointer;
       transition: transform 0.2s ease;
     }
-    .artefak-card:hover {
-      transform: scale(1.03);
-    }
-    .artefak-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    .artefak-card:hover { transform: scale(1.03); }
+    .artefak-card img { width: 100%; height: 100%; object-fit: cover; }
 
-    /* Tagline Penutup */
     .tagline {
       text-align: center;
       font-size: 16px;
@@ -155,66 +142,264 @@
       color: rgba(255,255,255,0.8);
       margin-top: 16px;
     }
+
+    .login-form {
+      max-width: 500px;
+      margin: 50px auto;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--border-radius);
+      color: white;
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent-blue);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <div class="logo">NOPE</div>
-  <div class="greeting">Hello @senja</div>
-
-  <!-- Artefak Utama -->
-  <div class="artefak-main">
-    <img src="https://via.placeholder.com/400x280/222/888?text=Artefak+Abadi" alt="Artefak" />
-    <div class="notasi">Senja abadi</div>
+  <div id="login-view" class="login-form">
+    <div class="logo">NOPE</div>
+    <h1>Masuk dengan username</h1>
+    <input type="text" id="username-input" placeholder="Contoh: senja nope" maxlength="30" />
+    <button id="login-btn">Masuk</button>
   </div>
 
-  <!-- Rantbox -->
-  <div class="rantbox">
-    <textarea placeholder="Jejakmu dalam 300 huruf..."></textarea>
-    <button class="cta">Jejakkan</button>
+  <div id="main-view" class="hidden">
+    <div class="logo">NOPE</div>
+    <div class="greeting" id="greeting">Hello @user</div>
+
+    <!-- Artefak Utama -->
+    <div id="artefak-main" class="artefak-main">
+      <div class="upload-main" id="upload-main-btn">+ Unggah Artefak (1x/30 hari)</div>
+    </div>
+
+    <!-- Rantbox -->
+    <div class="rantbox">
+      <textarea id="rant-input" placeholder="Jejakmu dalam 300 huruf..."></textarea>
+      <button class="cta" id="jejakkan-btn">Jejakkan</button>
+    </div>
+
+    <!-- Jurnal Rant -->
+    <div class="jurnal-rant" id="jurnal-container">
+      <!-- Akan diisi oleh JS -->
+    </div>
+
+    <!-- Tray Artefak -->
+    <div class="artefak-tray" id="artefak-tray">
+      <!-- Akan diisi oleh JS -->
+    </div>
+
+    <!-- Tagline -->
+    <div class="tagline">
+      untuk setiap jiwa<br>
+      yang memilih kejujuran<br>
+      tanpa meminta pengakuan
+    </div>
   </div>
 
-  <!-- Jurnal Rant -->
-  <div class="jurnal-rant">
-    <div class="rant-item">
-      <div class="rant-timestamp">25-Dec-25</div>
-      <div class="rant-text">kadang aku merasa dunia terlalu cepat, tapi di sini aku bisa bernapas perlahan.</div>
-    </div>
-    <div class="rant-item">
-      <div class="rant-timestamp">20-Dec-25</div>
-      <div class="rant-text">hari ini aku memaafkan diriku sendiri. itu cukup.</div>
-    </div>
-    <div class="rant-item">
-      <div class="rant-timestamp">18-Dec-25</div>
-      <div class="rant-text">kopi dingin, hujan di luar, dan playlist lama. semua terasa utuh.</div>
-    </div>
-    <div class="rant-item">
-      <div class="rant-timestamp">15-Dec-25</div>
-      <div class="rant-text">aku tidak butuh validasi. aku butuh ruang.</div>
-    </div>
-    <div class="rant-item">
-      <div class="rant-timestamp">10-Dec-25</div>
-      <div class="rant-text">terima kasih karena tidak memaksaku untuk “move on”.</div>
-    </div>
-  </div>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Tray Artefak -->
-  <div class="artefak-tray">
-    <div class="artefak-card"><img src="https://via.placeholder.com/120/444/aaa?text=1" /></div>
-    <div class="artefak-card"><img src="https://via.placeholder.com/120/555/bbb?text=2" /></div>
-    <div class="artefak-card"><img src="https://via.placeholder.com/120/666/ccc?text=3" /></div>
-    <div class="artefak-card"><img src="https://via.placeholder.com/120/777/ddd?text=4" /></div>
-    <div class="artefak-card"><img src="https://via.placeholder.com/120/888/eee?text=5" /></div>
-    <div class="artefak-card"><img src="https://via.placeholder.com/120/999/fff?text=6" /></div>
-  </div>
+  <script>
+    // 🔑 GANTI DENGAN DATA DARI DASHBOARD SUPABASE-MU
+    const SUPABASE_URL = 'https://nmgquhrqfdbhhmcntrwx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tcWN1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUwNTQzMzMsImV4cCI6MjA1MDYzMDMzM30.eL7W8b4K7rN7vT8tDf9P3e3o1gXz3V3m';
 
-  <!-- Tagline Penutup -->
-  <div class="tagline">
-    untuk setiap jiwa<br>
-    yang memilih kejujuran<br>
-    tanpa meminta pengakuan
-  </div>
+    // Inisialisasi
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentUser = null;
 
-  <!-- Supabase JS (opsional, jika nanti integrasi) -->
-  <!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> -->
+    // DOM
+    const loginView = document.getElementById('login-view');
+    const mainView = document.getElementById('main-view');
+    const usernameInput = document.getElementById('username-input');
+    const loginBtn = document.getElementById('login-btn');
+    const greetingEl = document.getElementById('greeting');
+    const rantInput = document.getElementById('rant-input');
+    const jejakkanBtn = document.getElementById('jejakkan-btn');
+    const uploadMainBtn = document.getElementById('upload-main-btn');
+    const jurnalContainer = document.getElementById('jurnal-container');
+    const artefakTray = document.getElementById('artefak-tray');
+    const artefakMain = document.getElementById('artefak-main');
+
+    // Login
+    loginBtn.addEventListener('click', () => {
+      const username = usernameInput.value.trim();
+      if (!username || username.split(' ').length !== 2) {
+        alert('Username harus 2 kata!');
+        return;
+      }
+      currentUser = { username };
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      greetingEl.textContent = `Hello @${username}`;
+      loginView.classList.add('hidden');
+      mainView.classList.remove('hidden');
+      loadAllData();
+    });
+
+    // Load saat halaman dibuka
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('currentUser');
+      if (saved) {
+        currentUser = JSON.parse(saved);
+        greetingEl.textContent = `Hello @${currentUser.username}`;
+        loginView.classList.add('hidden');
+        mainView.classList.remove('hidden');
+        loadAllData();
+      }
+    });
+
+    async function loadAllData() {
+      loadMainArtefak();
+      loadRants();
+      loadArtefaks();
+    }
+
+    // === MAIN ARTEFAK (1x per 30 hari) ===
+    async function loadMainArtefak() {
+      const { data, error } = await supabase
+        .from('artefaks')
+        .select('*')
+        .eq('user_id', currentUser.username)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) console.error(error);
+      else if (data && data[0]) {
+        const artefak = data[0];
+        artefakMain.innerHTML = `
+          <img src="${artefak.image_url}" alt="Artefak" />
+          <div class="notasi">${artefak.notasi || ''}</div>
+        `;
+      } else {
+        uploadMainBtn.innerHTML = '+ Unggah Artefak (1x/30 hari)';
+        artefakMain.innerHTML = '';
+        artefakMain.appendChild(uploadMainBtn);
+        uploadMainBtn.onclick = () => uploadMainArtefak();
+      }
+    }
+
+    async function uploadMainArtefak() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const filePath = `public/${currentUser.username.replace(/\s+/g, '_')}/main-${Date.now()}.jpg`;
+        const { data, error } = await supabase.storage
+          .from('artefak')
+          .upload(filePath, file, { contentType: 'image/jpeg', upsert: false });
+
+        if (error) {
+          alert('Gagal upload artefak.');
+          return;
+        }
+
+        const {  publicUrlData } = supabase.storage
+          .from('artefak')
+          .getPublicUrl(data.path);
+        const publicUrl = publicUrlData.publicUrl;
+
+        const notasi = prompt('Notasi (maks 4 kata):', 'Senja abadi');
+        if (!notasi) return;
+
+        const { error: insertError } = await supabase
+          .from('artefaks')
+          .insert({ user_id: currentUser.username, image_url: publicUrl, notasi });
+
+        if (insertError) alert('Gagal simpan artefak.');
+        else loadMainArtefak();
+      };
+      input.click();
+    }
+
+    // === RANTS ===
+    jejakkanBtn.addEventListener('click', async () => {
+      const content = rantInput.value.trim();
+      if (!content) return;
+      if (content.length > 300) {
+        alert('Maksimal 300 huruf!');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('rants')
+        .insert({ user_id: currentUser.username, content });
+
+      if (error) alert('Gagal menyimpan rant.');
+      else {
+        rantInput.value = '';
+        loadRants();
+      }
+    });
+
+    async function loadRants() {
+      const { data, error } = await supabase
+        .from('rants')
+        .select('*')
+        .eq('user_id', currentUser.username)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      jurnalContainer.innerHTML = '';
+      if (error) console.error(error);
+      else {
+        data.forEach(rant => {
+          const date = new Date(rant.created_at);
+          const formatted = date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: '2-digit'
+          }).replace(/ /g, '-').toLowerCase();
+
+          const div = document.createElement('div');
+          div.className = 'rant-item';
+          div.innerHTML = `
+            <div class="rant-timestamp">${formatted}</div>
+            <div class="rant-text">${rant.content}</div>
+          `;
+          jurnalContainer.appendChild(div);
+        });
+      }
+    }
+
+    // === TRAY ARTEFAK (6 terakhir) ===
+    async function loadArtefaks() {
+      const { data, error } = await supabase
+        .from('artefaks')
+        .select('*')
+        .eq('user_id', currentUser.username)
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      artefakTray.innerHTML = '';
+      if (error) console.error(error);
+      else {
+        data.forEach(artefak => {
+          const card = document.createElement('div');
+          card.className = 'artefak-card';
+          card.innerHTML = `<img src="${artefak.image_url}" alt="Artefak" />`;
+          artefakTray.appendChild(card);
+        });
+      }
+    }
+  </script>
 </body>
 </html>
