@@ -43,6 +43,7 @@
             color: #333; 
             font-weight: 500;
             font-size: 14px;
+            cursor: pointer;
         }
         input {
             width: 100%;
@@ -51,6 +52,7 @@
             border-radius: 12px;
             font-size: 16px;
             transition: all 0.3s;
+            display: block;
         }
         input:focus { 
             outline: none; 
@@ -118,30 +120,34 @@
         <p class="subtitle">Jejak Digital Anda. Tanpa email, tanpa password.</p>
         
         <div class="input-group">
-            <label>Buat Username Anda</label>
+            <label for="username">Buat Username Anda</label>
             <input 
                 type="text" 
                 id="username" 
                 placeholder="contoh: petualang senja"
                 autocomplete="off"
                 autofocus
+                aria-describedby="usernameHint"
             >
-            <div class="hint">Gunakan 2 kata atau lebih. Langsung masuk setelah ketik username.</div>
+            <div id="usernameHint" class="hint">Gunakan 2 kata atau lebih. Langsung masuk setelah ketik username.</div>
         </div>
         
         <div id="loading" class="loading">Menyiapkan jejak Anda...</div>
-        <div id="error" class="error"></div>
+        <div id="error" class="error" role="alert" aria-live="polite"></div>
         
         <button class="btn" id="loginBtn">Masuk ke Jejak Digital</button>
     </div>
 
     <script>
         // Pastikan Supabase tidak dideklarasikan ulang
-        if (typeof window.supabaseClient === 'undefined') {
+        if (!window.supabaseLoaded) {
             // Load Supabase hanya jika belum ada
             const script = document.createElement('script');
             script.src = 'https://unpkg.com/@supabase/supabase-js@2';
-            script.onload = initApp;
+            script.onload = function() {
+                window.supabaseLoaded = true;
+                initApp();
+            };
             document.head.appendChild(script);
         } else {
             initApp();
@@ -180,15 +186,18 @@
             const loginBtn = document.getElementById('loginBtn');
             
             errorEl.style.display = 'none';
+            errorEl.textContent = '';
             
             // Validasi sederhana
             if (!username) {
                 showError('Silakan masukkan username');
+                document.getElementById('username').focus();
                 return;
             }
             
             if (username.length < 3) {
                 showError('Username minimal 3 karakter');
+                document.getElementById('username').focus();
                 return;
             }
             
@@ -196,6 +205,7 @@
             const words = username.split(/\s+/).filter(word => word.length > 0);
             if (words.length < 2) {
                 showError('Gunakan setidaknya 2 kata (contoh: petualang senja)');
+                document.getElementById('username').focus();
                 return;
             }
             
