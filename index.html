@@ -6,7 +6,13 @@
     <title>NOPE - Jejak Digital</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+        }
+        
         body { 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -15,6 +21,7 @@
             align-items: center;
             padding: 20px;
         }
+        
         .container {
             max-width: 400px;
             width: 100%;
@@ -24,9 +31,26 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             text-align: center;
         }
-        .logo { font-size: 3rem; font-weight: bold; color: #764ba2; margin-bottom: 20px; }
-        h1 { color: #333; margin-bottom: 10px; font-size: 24px; }
-        p { color: #666; margin-bottom: 30px; line-height: 1.5; }
+        
+        .logo { 
+            font-size: 4rem; 
+            font-weight: bold; 
+            color: #764ba2; 
+            margin-bottom: 20px; 
+        }
+        
+        h1 { 
+            color: #333; 
+            margin-bottom: 10px; 
+            font-size: 24px; 
+        }
+        
+        p { 
+            color: #666; 
+            margin-bottom: 30px; 
+            line-height: 1.5; 
+        }
+        
         .btn {
             width: 100%;
             padding: 15px;
@@ -38,23 +62,72 @@
             transition: all 0.3s;
             margin-bottom: 15px;
         }
+        
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
+        
         .btn-secondary {
             background: #f0f0f0;
             color: #333;
         }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .loading { display: none; color: #667eea; margin-top: 20px; }
+        
+        .btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+        }
+        
+        .loading { 
+            display: none; 
+            color: #667eea; 
+            margin-top: 20px; 
+            font-size: 14px;
+        }
+        
+        .feature-list {
+            text-align: left;
+            margin: 20px 0;
+            padding: 0 20px;
+        }
+        
+        .feature-item {
+            margin-bottom: 10px;
+            color: #555;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-item::before {
+            content: "✓";
+            color: #2ed573;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .logo {
+                font-size: 3rem;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo">NOPE</div>
         <h1>Jejak Digital Anda</h1>
-        <p>Bagikan artefak setiap 30 hari atau tulis rant kapan saja.</p>
+        <p>Simpan artefak berharga dan bagikan cerita hidup</p>
+        
+        <div class="feature-list">
+            <div class="feature-item">Upload foto artefak</div>
+            <div class="feature-item">Tulis cerita kapan saja</div>
+            <div class="feature-item">Tanpa batasan waktu</div>
+            <div class="feature-item">Akses sebagai tamu</div>
+        </div>
         
         <div id="auth-buttons">
             <button class="btn btn-primary" onclick="window.location.href='login.html'">Login / Daftar</button>
@@ -65,20 +138,53 @@
     </div>
 
     <script>
-        // Auto redirect jika sudah pernah skip login
-        document.addEventListener('DOMContentLoaded', () => {
-            const skipLogin = localStorage.getItem('skip_login');
+        // ========== KONFIGURASI SUPABASE ==========
+        const SUPABASE_URL = 'https://mngquhrqfdbihmcntvw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uZ3F1aHJxZmRiaWhtY250dnciLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcxNjY4OTIwMCwiZXhwIjoyMDMyMjY1MjAwfQ.kK0jBd4o7aMqtw1rJyhYwxxmR7ePB1NJ4aUyNvZMvU0';
+        
+        // Inisialisasi Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true
+            }
+        });
+        
+        // ========== FUNGSI UTAMA ==========
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Index page loaded');
+            
+            // 1. Cek jika user pilih skip login sebelumnya
+            const skipLogin = localStorage.getItem('nope_skip_login');
             if (skipLogin === 'true') {
                 showLoading();
                 setTimeout(() => {
                     window.location.href = 'jejak.html?guest=true';
                 }, 1000);
+                return;
+            }
+            
+            // 2. Cek jika user sudah login
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) throw error;
+                
+                if (session) {
+                    console.log('User sudah login, redirect ke jejak');
+                    showLoading();
+                    setTimeout(() => {
+                        window.location.href = 'jejak.html';
+                    }, 1000);
+                }
+            } catch (error) {
+                console.log('Belum login atau error:', error.message);
             }
         });
         
         function skipToJejak() {
             showLoading();
-            localStorage.setItem('skip_login', 'true');
+            localStorage.setItem('nope_skip_login', 'true');
             setTimeout(() => {
                 window.location.href = 'jejak.html?guest=true';
             }, 1000);
@@ -88,6 +194,13 @@
             document.getElementById('auth-buttons').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
         }
+        
+        // Tekan Enter untuk skip login
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                skipToJejak();
+            }
+        });
     </script>
 </body>
 </html>
