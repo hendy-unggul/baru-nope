@@ -1,9 +1,21 @@
 {
-  "name": "NOPE",
+  "name": "NOPE - Jejak Digital",
   "short_name": "NOPE",
-  "start_url": "/",
+  "description": "Aplikasi untuk mencatat artefak dan cerita hidup",
+  "start_url": "/index.html",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
-  "icons": []
+  "background_color": "#667eea",
+  "theme_color": "#764ba2",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/667eea/ffffff?text=N",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://placehold.co/512x512/667eea/ffffff?text=N",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
