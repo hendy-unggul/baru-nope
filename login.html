@@ -123,7 +123,7 @@
             <input 
                 type="text" 
                 id="username" 
-                placeholder="contoh: petualang_senja"
+                placeholder="contoh: petualang senja"
                 autocomplete="off"
                 autofocus
             >
@@ -133,19 +133,33 @@
         <div id="loading" class="loading">Memeriksa username...</div>
         <div id="error" class="error"></div>
         
-        <button class="btn" onclick="handleEnter()">Masuk ke Jejak</button>
+        <button class="btn" id="loginBtn">Masuk ke Jejak</button>
         
         <div class="guest-option">
             <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Atau</p>
-            <button class="btn guest-btn" onclick="enterAsGuest()">Jelajah sebagai Tamu</button>
+            <button class="btn guest-btn" id="guestBtn">Jelajah sebagai Tamu</button>
         </div>
     </div>
 
     <script>
+        // Supabase initialization
         const SUPABASE_URL = 'https://nmgquhrqfdbhhmcntrwx.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZ3F1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2MjIzNjUsImV4cCI6MjA4MjE5ODM2NX0.0EMNhWe8dEA7fb7ydqo2ek3kKFefYhmTiEIa09A71DU';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabase;
+        
+        // Initialize Supabase
+        function initSupabase() {
+            if (!window.supabase) {
+                console.error('Supabase library not loaded');
+                return null;
+            }
+            
+            if (!supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+            return supabase;
+        }
         
         async function handleEnter() {
             const username = document.getElementById('username').value.trim();
@@ -165,72 +179,128 @@
                 return;
             }
             
-            if (username.split(' ').length < 2) {
-                showError('Gunakan setidaknya 2 kata (contoh: petualang_senja)');
+            // Validasi: minimal 2 kata (boleh dipisah spasi atau underscore)
+            const words = username.split(/[\s_]+/).filter(word => word.length > 0);
+            if (words.length < 2) {
+                showError('Gunakan setidaknya 2 kata (contoh: petualang senja)');
                 return;
             }
             
             // Tampilkan loading
             loadingEl.style.display = 'block';
+            document.getElementById('loginBtn').disabled = true;
             
             try {
+                // Inisialisasi Supabase
+                const supabaseClient = initSupabase();
+                if (!supabaseClient) {
+                    throw new Error('Tidak dapat terhubung ke server');
+                }
+                
+                // Format username: ganti spasi dengan underscore untuk konsistensi
+                const formattedUsername = username.replace(/\s+/g, '_').toLowerCase();
+                
                 // 1. Cek apakah username sudah ada
-                const { data: existingUsers, error: fetchError } = await supabase
+                const { data: existingUsers, error: fetchError } = await supabaseClient
                     .from('users')
                     .select('*')
-                    .eq('username', username)
+                    .ilike('username', formattedUsername) // Case-insensitive search
                     .limit(1);
                 
-                if (fetchError) throw fetchError;
+                if (fetchError) {
+                    console.error('Fetch error:', fetchError);
+                    throw new Error('Gagal memeriksa username');
+                }
+                
+                let userId;
+                let isNewUser = false;
                 
                 // 2. Jika belum ada, buat user baru
                 if (!existingUsers || existingUsers.length === 0) {
-                    const { data: newUser, error: insertError } = await supabase
+                    console.log('Creating new user:', formattedUsername);
+                    
+                    const { data: newUser, error: insertError } = await supabaseClient
                         .from('users')
                         .insert([{
-                            username: username,
+                            username: formattedUsername,
                             created_at: new Date().toISOString(),
                             last_login: new Date().toISOString()
                         }])
                         .select()
                         .single();
                     
-                    if (insertError) throw insertError;
+                    if (insertError) {
+                        console.error('Insert error:', insertError);
+                        
+                        // Coba lagi tanpa lowercase jika ada error
+                        const { data: retryUser, error: retryError } = await supabaseClient
+                            .from('users')
+                            .insert([{
+                                username: username,
+                                created_at: new Date().toISOString(),
+                                last_login: new Date().toISOString()
+                            }])
+                            .select()
+                            .single();
+                            
+                        if (retryError) {
+                            throw retryError;
+                        }
+                        
+                        userId = retryUser.id;
+                    } else {
+                        userId = newUser.id;
+                    }
                     
-                    // Simpan di localStorage
-                    localStorage.setItem('nope_user_id', newUser.id);
-                    localStorage.setItem('nope_username', username);
-                    localStorage.setItem('nope_is_new_user', 'true');
+                    isNewUser = true;
                     
                 } else {
                     // 3. Jika sudah ada, update last_login
                     const existingUser = existingUsers[0];
+                    console.log('Existing user found:', existingUser);
                     
-                    await supabase
+                    const { error: updateError } = await supabaseClient
                         .from('users')
-                        .update({ last_login: new Date().toISOString() })
+                        .update({ 
+                            last_login: new Date().toISOString(),
+                            login_count: (existingUser.login_count || 0) + 1
+                        })
                         .eq('id', existingUser.id);
                     
-                    // Simpan di localStorage
-                    localStorage.setItem('nope_user_id', existingUser.id);
-                    localStorage.setItem('nope_username', username);
-                    localStorage.setItem('nope_is_new_user', 'false');
+                    if (updateError) {
+                        console.error('Update error:', updateError);
+                    }
+                    
+                    userId = existingUser.id;
+                    isNewUser = false;
                 }
                 
+                // Simpan di localStorage
+                localStorage.setItem('nope_user_id', userId);
+                localStorage.setItem('nope_username', formattedUsername);
+                localStorage.setItem('nope_is_new_user', isNewUser.toString());
+                localStorage.setItem('nope_last_login', new Date().toISOString());
+                
+                console.log('Login successful, redirecting...');
+                
                 // Redirect ke jejak
-                window.location.href = 'jejak.html';
+                setTimeout(() => {
+                    window.location.href = 'jejak.html';
+                }, 500);
                 
             } catch (error) {
-                showError('Terjadi kesalahan. Coba lagi.');
-                console.error('Error:', error);
+                console.error('Login error:', error);
+                showError(error.message || 'Terjadi kesalahan. Coba lagi dengan username berbeda.');
             } finally {
                 loadingEl.style.display = 'none';
+                document.getElementById('loginBtn').disabled = false;
             }
         }
         
         function enterAsGuest() {
             localStorage.setItem('nope_guest', 'true');
             localStorage.setItem('nope_username', 'Tamu_' + Math.random().toString(36).substr(2, 5));
+            localStorage.setItem('nope_user_id', 'guest_' + Date.now());
             window.location.href = 'jejak.html?guest=true';
         }
         
@@ -240,15 +310,28 @@
             errorEl.style.display = 'block';
         }
         
-        // Enter key support
-        document.getElementById('username').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                handleEnter();
-            }
+        // Event listeners setelah DOM siap
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inisialisasi Supabase
+            initSupabase();
+            
+            // Setup event listeners
+            document.getElementById('loginBtn').addEventListener('click', handleEnter);
+            document.getElementById('guestBtn').addEventListener('click', enterAsGuest);
+            
+            // Enter key support
+            document.getElementById('username').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleEnter();
+                }
+            });
+            
+            // Auto-focus
+            document.getElementById('username').focus();
+            
+            // Clear any existing auth state
+            localStorage.removeItem('supabase.auth.token');
         });
-        
-        // Auto-focus
-        document.getElementById('username').focus();
     </script>
 </body>
 </html>
