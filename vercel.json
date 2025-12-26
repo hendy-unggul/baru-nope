@@ -1,13 +1,13 @@
+// vercel.json
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
-      ]
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_AUTO_REDIRECT": "true",
+      "NEXT_PUBLIC_GUEST_MODE": "true"
     }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/jejak" },
+    { "source": "/home", "destination": "/jejak" }
   ]
 }
