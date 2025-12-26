@@ -1,13 +1,15 @@
-// vercel.json
 {
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_AUTO_REDIRECT": "true",
-      "NEXT_PUBLIC_GUEST_MODE": "true"
-    }
-  },
   "rewrites": [
-    { "source": "/", "destination": "/jejak" },
-    { "source": "/home", "destination": "/jejak" }
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,DELETE,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-Requested-With, Content-Type, Authorization" }
+      ]
+    }
   ]
 }
