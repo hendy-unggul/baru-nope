@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - NOPE</title>
+    <title>Masuk - NOPE</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
@@ -22,81 +22,123 @@
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
         }
-        .back-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #764ba2;
-            margin-bottom: 20px;
-            padding: 5px;
+        h1 { 
+            color: #333; 
+            margin-bottom: 10px; 
+            font-size: 28px;
         }
-        h1 { color: #333; margin-bottom: 30px; text-align: center; }
-        .input-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; color: #333; font-weight: 500; }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .input-group { 
+            margin-bottom: 25px; 
+            text-align: left;
+        }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            color: #333; 
+            font-weight: 500;
+            font-size: 14px;
+        }
         input {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border: 2px solid #ddd;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
-        input:focus { outline: none; border-color: #667eea; }
+        input:focus { 
+            outline: none; 
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 8px;
+        }
         .btn {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            margin-bottom: 15px;
-        }
-        .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
+        .btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
         }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .btn:active {
+            transform: translateY(0);
+        }
         .error {
             color: #ff4757;
-            margin-top: 10px;
-            text-align: center;
-            display: none;
+            margin: 15px 0;
             padding: 10px;
             background: #ffeaea;
             border-radius: 10px;
+            display: none;
+        }
+        .loading {
+            display: none;
+            margin: 15px 0;
+            color: #667eea;
+            font-size: 14px;
+        }
+        .guest-option {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .guest-btn {
+            background: transparent;
+            border: 2px solid #ddd;
+            color: #666;
+            margin-top: 10px;
+        }
+        .guest-btn:hover {
+            background: #f9f9f9;
+            box-shadow: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <button class="back-btn" onclick="window.location.href='index.html'">←</button>
-        <h1>Login ke NOPE</h1>
+        <h1>NOPE</h1>
+        <p class="subtitle">Jejak Digital Anda. Tanpa email, tanpa password.</p>
         
         <div class="input-group">
-            <label>Email</label>
-            <input type="email" id="email" placeholder="email@contoh.com">
+            <label>Username Anda</label>
+            <input 
+                type="text" 
+                id="username" 
+                placeholder="contoh: petualang_senja"
+                autocomplete="off"
+                autofocus
+            >
+            <div class="hint">Gunakan 2 kata atau lebih. Tidak perlu email/password.</div>
         </div>
         
-        <div class="input-group">
-            <label>Password</label>
-            <input type="password" id="password" placeholder="Password Anda">
-        </div>
-        
+        <div id="loading" class="loading">Memeriksa username...</div>
         <div id="error" class="error"></div>
         
-        <button class="btn btn-primary" onclick="handleLogin()">Login</button>
+        <button class="btn" onclick="handleEnter()">Masuk ke Jejak</button>
         
-        <div style="text-align: center; margin: 20px 0; color: #666;">Atau</div>
-        
-        <button class="btn btn-secondary" onclick="skipToJejak()">Lanjut sebagai Tamu</button>
+        <div class="guest-option">
+            <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Atau</p>
+            <button class="btn guest-btn" onclick="enterAsGuest()">Jelajah sebagai Tamu</button>
+        </div>
     </div>
 
     <script>
@@ -105,32 +147,90 @@
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        async function handleLogin() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        async function handleEnter() {
+            const username = document.getElementById('username').value.trim();
             const errorEl = document.getElementById('error');
+            const loadingEl = document.getElementById('loading');
             
             errorEl.style.display = 'none';
             
-            if (!email || !password) {
-                showError('Email dan password harus diisi');
+            // Validasi sederhana
+            if (!username) {
+                showError('Silakan masukkan username');
                 return;
             }
             
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
+            if (username.length < 3) {
+                showError('Username minimal 3 karakter');
+                return;
+            }
             
-            if (error) {
-                showError(error.message);
-            } else {
+            if (username.split(' ').length < 2) {
+                showError('Gunakan setidaknya 2 kata (contoh: petualang_senja)');
+                return;
+            }
+            
+            // Tampilkan loading
+            loadingEl.style.display = 'block';
+            
+            try {
+                // 1. Cek apakah username sudah ada
+                const { data: existingUsers, error: fetchError } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', username)
+                    .limit(1);
+                
+                if (fetchError) throw fetchError;
+                
+                // 2. Jika belum ada, buat user baru
+                if (!existingUsers || existingUsers.length === 0) {
+                    const { data: newUser, error: insertError } = await supabase
+                        .from('users')
+                        .insert([{
+                            username: username,
+                            created_at: new Date().toISOString(),
+                            last_login: new Date().toISOString()
+                        }])
+                        .select()
+                        .single();
+                    
+                    if (insertError) throw insertError;
+                    
+                    // Simpan di localStorage
+                    localStorage.setItem('nope_user_id', newUser.id);
+                    localStorage.setItem('nope_username', username);
+                    localStorage.setItem('nope_is_new_user', 'true');
+                    
+                } else {
+                    // 3. Jika sudah ada, update last_login
+                    const existingUser = existingUsers[0];
+                    
+                    await supabase
+                        .from('users')
+                        .update({ last_login: new Date().toISOString() })
+                        .eq('id', existingUser.id);
+                    
+                    // Simpan di localStorage
+                    localStorage.setItem('nope_user_id', existingUser.id);
+                    localStorage.setItem('nope_username', username);
+                    localStorage.setItem('nope_is_new_user', 'false');
+                }
+                
+                // Redirect ke jejak
                 window.location.href = 'jejak.html';
+                
+            } catch (error) {
+                showError('Terjadi kesalahan. Coba lagi.');
+                console.error('Error:', error);
+            } finally {
+                loadingEl.style.display = 'none';
             }
         }
         
-        function skipToJejak() {
-            localStorage.setItem('nope_skip_login', 'true');
+        function enterAsGuest() {
+            localStorage.setItem('nope_guest', 'true');
+            localStorage.setItem('nope_username', 'Tamu_' + Math.random().toString(36).substr(2, 5));
             window.location.href = 'jejak.html?guest=true';
         }
         
@@ -140,11 +240,15 @@
             errorEl.style.display = 'block';
         }
         
-        document.getElementById('password').addEventListener('keypress', function(e) {
+        // Enter key support
+        document.getElementById('username').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                handleLogin();
+                handleEnter();
             }
         });
+        
+        // Auto-focus
+        document.getElementById('username').focus();
     </script>
 </body>
 </html>
