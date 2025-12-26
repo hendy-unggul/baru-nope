@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk - NOPE</title>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <title>NOPE - Masuk</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
         body {
@@ -82,6 +81,12 @@
         .btn:active {
             transform: translateY(0);
         }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
         .error {
             color: #ff4757;
             margin: 15px 0;
@@ -96,30 +101,24 @@
             color: #667eea;
             font-size: 14px;
         }
-        .guest-option {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        .guest-btn {
-            background: transparent;
-            border: 2px solid #ddd;
-            color: #666;
-            margin-top: 10px;
-        }
-        .guest-btn:hover {
-            background: #f9f9f9;
-            box-shadow: none;
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>NOPE</h1>
+        <div class="logo">NOPE</div>
         <p class="subtitle">Jejak Digital Anda. Tanpa email, tanpa password.</p>
         
         <div class="input-group">
-            <label>Username Anda</label>
+            <label>Buat Username Anda</label>
             <input 
                 type="text" 
                 id="username" 
@@ -127,44 +126,58 @@
                 autocomplete="off"
                 autofocus
             >
-            <div class="hint">Gunakan 2 kata atau lebih. Tidak perlu email/password.</div>
+            <div class="hint">Gunakan 2 kata atau lebih. Langsung masuk setelah ketik username.</div>
         </div>
         
-        <div id="loading" class="loading">Memeriksa username...</div>
+        <div id="loading" class="loading">Menyiapkan jejak Anda...</div>
         <div id="error" class="error"></div>
         
-        <button class="btn" id="loginBtn">Masuk ke Jejak</button>
-        
-        <div class="guest-option">
-            <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Atau</p>
-            <button class="btn guest-btn" id="guestBtn">Jelajah sebagai Tamu</button>
-        </div>
+        <button class="btn" id="loginBtn">Masuk ke Jejak Digital</button>
     </div>
 
     <script>
-        // Supabase initialization
-        const SUPABASE_URL = 'https://nmgquhrqfdbhhmcntrwx.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZ3F1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2MjIzNjUsImV4cCI6MjA4MjE5ODM2NX0.0EMNhWe8dEA7fb7ydqo2ek3kKFefYhmTiEIa09A71DU';
+        // Pastikan Supabase tidak dideklarasikan ulang
+        if (typeof window.supabaseClient === 'undefined') {
+            // Load Supabase hanya jika belum ada
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/@supabase/supabase-js@2';
+            script.onload = initApp;
+            document.head.appendChild(script);
+        } else {
+            initApp();
+        }
         
-        let supabase;
-        
-        // Initialize Supabase
-        function initSupabase() {
-            if (!window.supabase) {
-                console.error('Supabase library not loaded');
-                return null;
+        function initApp() {
+            // Supabase configuration
+            const SUPABASE_URL = 'https://nmgquhrqfdbhhmcntrwx.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZ3F1aHJxZmRiaGhtY250cnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2MjIzNjUsImV4cCI6MjA4MjE5ODM2NX0.0EMNhWe8dEA7fb7ydqo2ek3kKFefYhmTiEIa09A71DU';
+            
+            // Buat client Supabase sekali saja
+            if (!window.supabaseClient) {
+                window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
             
-            if (!supabase) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            }
-            return supabase;
+            const supabase = window.supabaseClient;
+            
+            // Setup event listeners
+            document.getElementById('loginBtn').addEventListener('click', handleEnter);
+            
+            // Enter key support
+            document.getElementById('username').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleEnter();
+                }
+            });
+            
+            // Auto-focus
+            document.getElementById('username').focus();
         }
         
         async function handleEnter() {
             const username = document.getElementById('username').value.trim();
             const errorEl = document.getElementById('error');
             const loadingEl = document.getElementById('loading');
+            const loginBtn = document.getElementById('loginBtn');
             
             errorEl.style.display = 'none';
             
@@ -179,8 +192,8 @@
                 return;
             }
             
-            // Validasi: minimal 2 kata (boleh dipisah spasi atau underscore)
-            const words = username.split(/[\s_]+/).filter(word => word.length > 0);
+            // Validasi: minimal 2 kata
+            const words = username.split(/\s+/).filter(word => word.length > 0);
             if (words.length < 2) {
                 showError('Gunakan setidaknya 2 kata (contoh: petualang senja)');
                 return;
@@ -188,150 +201,137 @@
             
             // Tampilkan loading
             loadingEl.style.display = 'block';
-            document.getElementById('loginBtn').disabled = true;
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Memproses...';
             
             try {
-                // Inisialisasi Supabase
-                const supabaseClient = initSupabase();
-                if (!supabaseClient) {
-                    throw new Error('Tidak dapat terhubung ke server');
+                const supabase = window.supabaseClient;
+                if (!supabase) {
+                    throw new Error('Aplikasi belum siap. Refresh halaman.');
                 }
                 
-                // Format username: ganti spasi dengan underscore untuk konsistensi
-                const formattedUsername = username.replace(/\s+/g, '_').toLowerCase();
+                // Format username: lowercase dan ganti spasi dengan underscore
+                const formattedUsername = username.toLowerCase().replace(/\s+/g, '_');
                 
-                // 1. Cek apakah username sudah ada
-                const { data: existingUsers, error: fetchError } = await supabaseClient
+                console.log('Mencoba login dengan username:', formattedUsername);
+                
+                // Coba cari user yang sudah ada
+                const { data: existingUsers, error: fetchError } = await supabase
                     .from('users')
-                    .select('*')
-                    .ilike('username', formattedUsername) // Case-insensitive search
+                    .select('id, username, login_count')
+                    .eq('username', formattedUsername)
                     .limit(1);
                 
                 if (fetchError) {
-                    console.error('Fetch error:', fetchError);
-                    throw new Error('Gagal memeriksa username');
+                    console.error('Error fetching user:', fetchError);
+                    // Coba buat user baru
+                    return await createNewUser(formattedUsername);
                 }
                 
                 let userId;
                 let isNewUser = false;
                 
-                // 2. Jika belum ada, buat user baru
-                if (!existingUsers || existingUsers.length === 0) {
-                    console.log('Creating new user:', formattedUsername);
+                if (existingUsers && existingUsers.length > 0) {
+                    // User sudah ada
+                    const user = existingUsers[0];
+                    userId = user.id;
+                    isNewUser = false;
                     
-                    const { data: newUser, error: insertError } = await supabaseClient
-                        .from('users')
-                        .insert([{
-                            username: formattedUsername,
-                            created_at: new Date().toISOString(),
-                            last_login: new Date().toISOString()
-                        }])
-                        .select()
-                        .single();
+                    console.log('User ditemukan:', user);
                     
-                    if (insertError) {
-                        console.error('Insert error:', insertError);
-                        
-                        // Coba lagi tanpa lowercase jika ada error
-                        const { data: retryUser, error: retryError } = await supabaseClient
-                            .from('users')
-                            .insert([{
-                                username: username,
-                                created_at: new Date().toISOString(),
-                                last_login: new Date().toISOString()
-                            }])
-                            .select()
-                            .single();
-                            
-                        if (retryError) {
-                            throw retryError;
-                        }
-                        
-                        userId = retryUser.id;
-                    } else {
-                        userId = newUser.id;
-                    }
-                    
-                    isNewUser = true;
-                    
-                } else {
-                    // 3. Jika sudah ada, update last_login
-                    const existingUser = existingUsers[0];
-                    console.log('Existing user found:', existingUser);
-                    
-                    const { error: updateError } = await supabaseClient
+                    // Update last login
+                    const newLoginCount = (user.login_count || 0) + 1;
+                    const { error: updateError } = await supabase
                         .from('users')
                         .update({ 
                             last_login: new Date().toISOString(),
-                            login_count: (existingUser.login_count || 0) + 1
+                            login_count: newLoginCount
                         })
-                        .eq('id', existingUser.id);
+                        .eq('id', userId);
                     
                     if (updateError) {
-                        console.error('Update error:', updateError);
+                        console.error('Error updating login:', updateError);
                     }
                     
-                    userId = existingUser.id;
-                    isNewUser = false;
+                } else {
+                    // Buat user baru
+                    userId = await createNewUser(formattedUsername);
+                    isNewUser = true;
                 }
                 
-                // Simpan di localStorage
+                // Simpan session di localStorage
                 localStorage.setItem('nope_user_id', userId);
                 localStorage.setItem('nope_username', formattedUsername);
                 localStorage.setItem('nope_is_new_user', isNewUser.toString());
                 localStorage.setItem('nope_last_login', new Date().toISOString());
                 
-                console.log('Login successful, redirecting...');
+                console.log('Login berhasil! Redirecting...');
                 
                 // Redirect ke jejak
                 setTimeout(() => {
                     window.location.href = 'jejak.html';
-                }, 500);
+                }, 300);
                 
             } catch (error) {
                 console.error('Login error:', error);
-                showError(error.message || 'Terjadi kesalahan. Coba lagi dengan username berbeda.');
+                showError('Gagal masuk. Coba username lain atau refresh halaman.');
             } finally {
                 loadingEl.style.display = 'none';
-                document.getElementById('loginBtn').disabled = false;
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Masuk ke Jejak Digital';
             }
         }
         
-        function enterAsGuest() {
-            localStorage.setItem('nope_guest', 'true');
-            localStorage.setItem('nope_username', 'Tamu_' + Math.random().toString(36).substr(2, 5));
-            localStorage.setItem('nope_user_id', 'guest_' + Date.now());
-            window.location.href = 'jejak.html?guest=true';
+        async function createNewUser(username) {
+            const supabase = window.supabaseClient;
+            
+            const { data: newUser, error: insertError } = await supabase
+                .from('users')
+                .insert([{
+                    username: username,
+                    created_at: new Date().toISOString(),
+                    last_login: new Date().toISOString(),
+                    login_count: 1
+                }])
+                .select('id')
+                .single();
+            
+            if (insertError) {
+                console.error('Error creating user:', insertError);
+                
+                // Coba dengan timestamp untuk membuat unik
+                const uniqueUsername = username + '_' + Date.now().toString().slice(-4);
+                const { data: retryUser, error: retryError } = await supabase
+                    .from('users')
+                    .insert([{
+                        username: uniqueUsername,
+                        created_at: new Date().toISOString(),
+                        last_login: new Date().toISOString(),
+                        login_count: 1
+                    }])
+                    .select('id')
+                    .single();
+                
+                if (retryError) {
+                    throw new Error('Username sudah digunakan. Coba yang lain.');
+                }
+                
+                return retryUser.id;
+            }
+            
+            return newUser.id;
         }
         
         function showError(message) {
             const errorEl = document.getElementById('error');
             errorEl.textContent = message;
             errorEl.style.display = 'block';
+            
+            // Auto-hide error setelah 5 detik
+            setTimeout(() => {
+                errorEl.style.display = 'none';
+            }, 5000);
         }
-        
-        // Event listeners setelah DOM siap
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inisialisasi Supabase
-            initSupabase();
-            
-            // Setup event listeners
-            document.getElementById('loginBtn').addEventListener('click', handleEnter);
-            document.getElementById('guestBtn').addEventListener('click', enterAsGuest);
-            
-            // Enter key support
-            document.getElementById('username').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleEnter();
-                }
-            });
-            
-            // Auto-focus
-            document.getElementById('username').focus();
-            
-            // Clear any existing auth state
-            localStorage.removeItem('supabase.auth.token');
-        });
     </script>
 </body>
 </html>
