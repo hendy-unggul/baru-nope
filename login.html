@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - NOPE</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #764ba2;
+            margin-bottom: 20px;
+            padding: 5px;
+        }
+        h1 { color: #333; margin-bottom: 30px; text-align: center; }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            font-weight: 600;
+        }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; color: #333; font-weight: 500; }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus { outline: none; border-color: #667eea; }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .error {
+            color: #ff4757;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+            padding: 10px;
+            background: #ffeaea;
+            border-radius: 10px;
+        }
+        .success {
+            color: #2ed573;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+            padding: 10px;
+            background: #eaffea;
+            border-radius: 10px;
+        }
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            color: #666;
+            position: relative;
+        }
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ddd;
+            z-index: 1;
+        }
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            z-index: 2;
+        }
+        .password-toggle {
+            position: relative;
+        }
+        .toggle-btn {
+            position: absolute;
+            right: 10px;
+            top: 38px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('login')">Login</button>
+            <button class="tab" onclick="switchTab('register')">Daftar</button>
+        </div>
+        
+        <!-- Login Form -->
+        <div id="login-form">
+            <h1>Login ke NOPE</h1>
+            
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="login-email" placeholder="email@contoh.com">
+            </div>
+            
+            <div class="input-group password-toggle">
+                <label>Password</label>
+                <input type="password" id="login-password" placeholder="Password Anda">
+                <button class="toggle-btn" type="button" onclick="togglePassword('login-password')">👁️</button>
+            </div>
+            
+            <div id="login-error" class="error"></div>
+            <div id="login-success" class="success"></div>
+            
+            <button class="btn btn-primary" onclick="handleLogin()">Login</button>
+            
+            <div class="divider"><span>Atau</span></div>
+            
+            <button class="btn btn-secondary" onclick="skipToJejak()">Lanjut sebagai Tamu</button>
+        </div>
+        
+        <!-- Register Form -->
+        <div id="register-form" style="display: none;">
+            <h1>Daftar ke NOPE</h1>
+            
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="register-email" placeholder="email@contoh.com">
+            </div>
+            
+            <div class="input-group password-toggle">
+                <label>Password</label>
+                <input type="password" id="register-password" placeholder="Minimal 6 karakter">
+                <button class="toggle-btn" type="button" onclick="togglePassword('register-password')">👁️</button>
+            </div>
+            
+            <div class="input-group password-toggle">
+                <label>Konfirmasi Password</label>
+                <input type="password" id="register-confirm" placeholder="Ulangi password">
+                <button class="toggle-btn" type="button" onclick="togglePassword('register-confirm')">👁️</button>
+            </div>
+            
+            <div id="register-error" class="error"></div>
+            <div id="register-success" class="success"></div>
+            
+            <button class="btn btn-primary" onclick="handleRegister()">Daftar</button>
+            
+            <div class="divider"><span>Sudah punya akun?</span></div>
+            
+            <button class="btn btn-secondary" onclick="switchTab('login')">Login di sini</button>
+        </div>
+    </div>
+
+    <script>
+        // GANTI DENGAN KONFIGURASI SUPABASE ANDA
+        const SUPABASE_URL = 'https://mngquhrqfdbihmcntvw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uZ3F1aHJxZmRiaWhtY250dnciLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcxNjY4OTIwMCwiZXhwIjoyMDMyMjY1MjAwfQ.kK0jBd4o7aMqtw1rJyhYwxxmR7ePB1NJ4aUyNvZMvU0';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentTab = 'login';
+        
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide forms
+            if (tabName === 'login') {
+                document.getElementById('login-form').style.display = 'block';
+                document.getElementById('register-form').style.display = 'none';
+            } else {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('register-form').style.display = 'block';
+            }
+            
+            // Clear errors
+            clearErrors();
+        }
+        
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+            const successEl = document.getElementById('login-success');
+            
+            clearErrors();
+            
+            if (!email || !password) {
+                showError(errorEl, 'Email dan password harus diisi');
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) throw error;
+                
+                // Login sukses
+                showSuccess(successEl, 'Login berhasil! Mengarahkan...');
+                setTimeout(() => {
+                    window.location.href = 'jejak.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showError(errorEl, error.message || 'Gagal login. Cek email dan password.');
+            }
+        }
+        
+        async function handleRegister() {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirm = document.getElementById('register-confirm').value;
+            const errorEl = document.getElementById('register-error');
+            const successEl = document.getElementById('register-success');
+            
+            clearErrors();
+            
+            // Validasi
+            if (!email || !password || !confirm) {
+                showError(errorEl, 'Semua field harus diisi');
+                return;
+            }
+            
+            if (password !== confirm) {
+                showError(errorEl, 'Password tidak cocok');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError(errorEl, 'Password minimal 6 karakter');
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        emailRedirectTo: window.location.origin + '/jejak.html'
+                    }
+                });
+                
+                if (error) throw error;
+                
+                // Registrasi sukses
+                showSuccess(successEl, 'Registrasi berhasil! Cek email untuk verifikasi.');
+                
+                // Auto-switch to login after 3 seconds
+                setTimeout(() => {
+                    switchTab('login');
+                    document.getElementById('login-email').value = email;
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Register error:', error);
+                showError(errorEl, error.message || 'Gagal mendaftar. Coba email lain.');
+            }
+        }
+        
+        function skipToJejak() {
+            localStorage.setItem('skip_login', 'true');
+            window.location.href = 'jejak.html?guest=true';
+        }
+        
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+        }
+        
+        function showError(element, message) {
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showSuccess(element, message) {
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+        
+        function clearErrors() {
+            document.querySelectorAll('.error, .success').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+        
+        // Enter key to submit
+        document.getElementById('login-password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && currentTab === 'login') handleLogin();
+        });
+        
+        document.getElementById('register-confirm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && currentTab === 'register') handleRegister();
+        });
+        
+        // Auto-focus email field
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('login-email').focus();
+        });
+    </script>
+</body>
+</html>
